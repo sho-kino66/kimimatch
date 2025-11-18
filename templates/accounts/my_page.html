@@ -155,7 +155,65 @@
 
     <hr>
 
-    <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+    <!-- ======================= -->
+    <!-- ここから追加部分！（採点機能） -->
+    <!-- ======================= -->
+
+    <h3>コード採点</h3>
+
+    <!-- PDF アップロード -->
+    <input type="file" id="pdf-input" accept="application/pdf">
+
+    <!-- 採点ボタン -->
+    <button id="grade-btn" class="btn btn-detail" style="margin-top: 10px;">
+      PDF を採点する
+    </button>
+
+    <!-- 結果表示 -->
+    <div id="result" style="white-space: pre-wrap; margin-top: 20px;"></div>
+
+    <script>
+      document.getElementById("grade-btn").addEventListener("click", async () => {
+          const pdfFile = document.getElementById("pdf-input").files[0];
+
+          if (!pdfFile) {
+              alert("PDFを選択してください");
+              return;
+          }
+
+          const formData = new FormData();
+          formData.append("pdf_file", pdfFile);
+
+          // ローカル API
+          const apiUrl = "http://localhost:8001/grade_pdf/";
+
+          try {
+              const response = await fetch(apiUrl, {
+                  method: "POST",
+                  body: formData
+              });
+
+              const data = await response.json();
+
+              if (data.error) {
+                  document.getElementById("result").innerText = "エラー: " + data.error;
+              } else {
+                  document.getElementById("result").innerText =
+                      "【採点結果】\n" + data.result + "\n\n【抽出プレビュー】\n" + data.preview;
+              }
+          } catch (err) {
+              document.getElementById("result").innerText = "通信エラー: " + err;
+          }
+      });
+    </script>
+
+    <!-- ======================= -->
+    <!-- 追加部分ここまで -->
+    <!-- ======================= -->
+
+    <a href="{% url 'accounts:dashboard' %}" class="back-link" style="display: block; margin-top: 20px;">
+      ← メインメニューに戻る
+    </a>
 
   </div>
 </div>
