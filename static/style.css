@@ -1779,119 +1779,163 @@ header {
 }
 /* === 13. トップページ (top_page.html) === */
 
-.top-page-container {
-  padding: 40px 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
+/* トップページ全体を包むラッパー */
+
+
+/* ヘッダー背景 (赤) */
+body.top-page-mode header {
+  background-color: #e62e2e !important;
+  border-bottom: 3px solid #cc0000 !important;
 }
 
-/* タイトル周り */
-.app-title {
-  font-size: 3rem;
+/* ヘッダー文字色 (白) */
+body.top-page-mode header h1 a,
+body.top-page-mode header nav a {
+  color: #ffffff !important;
+}
+body.top-page-mode header nav a {
+  display: none !important;
+}
+
+/* ハンバーガーメニューアイコン (白) */
+body.top-page-mode .hamburger-icon span {
+  background-color: #ffffff !important;
+}
+
+/* フッター背景 (赤) */
+body.top-page-mode footer {
+  background-color: #e62e2e !important;
+  color: #ffffff !important;
+  border-top: 3px solid #cc0000 !important;
+}
+.top-page-wrapper {
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
   color: #333;
-  margin-bottom: 10px;
-  border-left: none !important; /* base.htmlのスタイルをリセット */
-  letter-spacing: 2px;
-}
-.app-subtitle {
-  color: #666;
-  font-size: 1.1rem;
-  margin-bottom: 40px;
-  line-height: 1.8;
+  font-size: 20px;
+  
+  /* ★ 背景画像の設定 (style.cssからの相対パス) */
+  background-image: url('img/job_background1.jpg'); 
+  
+  /* 画像を画面より少し大きくして、アニメーションさせる設定 */
+  background-size: 115% 115%; 
+  background-position: center;
+  background-attachment: fixed;
+  animation: slowPan 25s infinite linear;
+  
+  /* コンテンツの余白 */
+  padding: 40px 20px;
+  min-height: 100vh; /* 画面いっぱいに広げる */
+  box-sizing: border-box;
 }
 
-/* ログイン・登録ボックス */
-.auth-box {
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 500px;
+/* 背景アニメーションの定義 */
+@keyframes slowPan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* トップページ内のメインコンテナ */
+.top-page-wrapper .container {
+  max-width: 900px;
   margin: 0 auto;
-}
-.auth-item p {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-.auth-separator {
-  height: 1px;
-  background-color: #eee;
-  width: 100%;
+  padding: 25px;
+  background-color: rgba(255, 255, 255, 0.95); /* 背景を少し透過 */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ボタン */
-.btn-login {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff; /* 青 */
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
+/* 認証ボックス */
+.top-page-wrapper .auth-box {
+  margin-top: 30px;
+  padding: 30px;
+  border: 2px solid #ff9999;
+  border-radius: 12px;
+  background-color: #fffafa;
   text-align: center;
-  transition: opacity 0.2s;
 }
-.btn-signup {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background-color: #f6c200; /* 黄 */
-  color: #fff;
+.top-page-wrapper .auth-box p {
+  margin-bottom: 20px;
+  font-size: 1.1em;
   font-weight: bold;
-  border-radius: 8px;
-  text-align: center;
-  transition: opacity 0.2s;
 }
-.btn-login:hover, .btn-signup:hover {
-  opacity: 0.8;
+
+/* トップページ専用ボタン */
+.top-page-wrapper .btn {
+  display: inline-block;
+  font-size: 1.1em;
+  font-weight: bold;
   text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-top: 5px;
+  cursor: pointer;
+}
+.top-page-wrapper .btn-primary {
+  background-color: #ff4d4d; /* 赤 */
+  color: #ffffff;
+  border: none;
+}
+.top-page-wrapper .btn-primary:hover {
+  background-color: #e60000;
+  transform: translateY(-2px);
+  color: #fff;
+}
+.top-page-wrapper .btn-secondary {
+  background-color: #0056b3; /* 青 */
+  color: #ffffff;
+  border: none;
+}
+.top-page-wrapper .btn-secondary:hover {
+  background-color: #004494;
+  transform: translateY(-2px);
   color: #fff;
 }
 
 /* 区切り線 */
-.section-divider {
-  border: none;
-  border-top: 1px dashed #ccc;
-  margin: 50px 0;
+.top-page-wrapper hr {
+  border: 0;
+  border-top: 1px dashed #ff9999;
+  margin: 40px 0;
 }
 
-/* サービス紹介カード */
-.service-links {
-  display: flex;
-  justify-content: center;
+/* 機能紹介（3ボタン） */
+.top-page-wrapper .service-links {
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
-  flex-wrap: wrap;
 }
-.service-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-  width: 200px;
-  padding: 20px;
+.top-page-wrapper .service-links a {
+  display: block;
+  padding: 30px 15px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1.1em; 
+  font-weight: bold;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  border: 2px solid #cc0000;
+  background-color: #ffffff;
+  color: #cc0000;
 }
-.service-card:hover {
+.top-page-wrapper .service-links a:hover {
+  background-color: #cc0000;
+  color: #ffffff;
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.top-page-wrapper .service-links a span {
+  display: block;
+  font-size: 2.5em;
+  margin-bottom: 15px;
 }
 
-.service-card .icon { font-size: 3rem; margin-bottom: 10px; }
-.service-card .text { font-weight: bold; font-size: 1.1rem; color: #333; margin-bottom: 5px;}
-.service-card small { font-size: 0.8rem; color: #888; }
-
-/* カードごとの色 */
-.service-card.student-service:hover { border-color: #16a34a; }
-.service-card.company-service:hover { border-color: #d9a900; }
-.service-card.school-service:hover { border-color: #3b82f6; }
+/* スマホ対応 */
+@media (max-width: 768px) {
+  .top-page-wrapper .service-links {
+      grid-template-columns: 1fr;
+  }
+}

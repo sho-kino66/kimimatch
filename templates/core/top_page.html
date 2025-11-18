@@ -1,55 +1,76 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}トップページ | KimiMatch{% endblock %}
 
 {% block content %}
-<div class="top-page-container">
 
-  <div class="hero-section">
-    <h2 class="app-title">KimiMatch</h2>
-    <p class="app-subtitle">
-      専門学校生と企業をつなぐ<br>
-      新しいポートフォリオ型マッチングプラットフォーム
-    </p>
+<div class="top-page-wrapper">
+    <div class="container">
+        
+        <h2 style="text-align: center; color: #e62e2e; border-bottom: none; font-size: 2.2em; font-weight: bold; margin-bottom: 0;">
+            KimiMatch へようこそ
+        </h2>
+        <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em;">
+            専門学校生と企業をつなぐ、ポートフォリオ型マッチングプラットフォーム
+        </p>
 
-    <div class="auth-box">
-      <div class="auth-item">
-        <p>すでにアカウントをお持ちの方</p>
-        <a href="{% url 'accounts:login' %}" class="btn btn-login">ログイン</a>
-      </div>
-      <div class="auth-separator"></div>
-      <div class="auth-item">
-        <p>初めてご利用の方（学生・教員・企業）</p>
-        <a href="{% url 'accounts:signup_type_select' %}" class="btn btn-signup">新規登録</a>
-      </div>
+        <div class="auth-box">
+            <p>
+                すでにアカウントをお持ちの方はこちら<br>
+                <a href="{% url 'accounts:login' %}" class="btn btn-secondary">ログイン</a>
+            </p>
+            <hr style="margin: 20px 0; border-top: 1px solid #ffd1d1;">
+            <p>
+                初めてご利用の方（学生・教員・企業）はこちら<br>
+                <a href="{% url 'accounts:signup_type_select' %}" class="btn btn-primary">新規登録</a>
+            </p>
+        </div>
+
+        <hr>
+        
+        <h3 style="text-align: center; color: #333; font-size: 1.5em; border-bottom: none;">機能紹介</h3>
+        <div class="service-links">
+            
+            <a href="{% url 'core:student_service' %}">
+                <span>🎓</span>
+                学生向けの機能
+            </a>
+
+            <a href="{% url 'core:company_service' %}">
+                <span>🏢</span>
+                企業向けの機能
+            </a>
+
+            <a href="{% url 'core:school_service' %}"> 
+                <span>👨‍🏫</span>
+                学校向けの機能
+            </a>
+
+        </div>
+
     </div>
-  </div>
-
-  <hr class="section-divider">
-
-  <h3 style="text-align: center; color: #555; margin-bottom: 20px;">機能紹介</h3>
-  
-  <div class="service-links">
-      
-      <a href="{% url 'core:student_service' %}" class="service-card student-service">
-          <span class="icon">🎓</span>
-          <span class="text">学生向けの機能</span>
-          <small>ポートフォリオ作成・企業検索</small>
-      </a>
-
-      <a href="{% url 'core:company_service' %}" class="service-card company-service">
-          <span class="icon">🏢</span>
-          <span class="text">企業向けの機能</span>
-          <small>スカウト・ダイレクトチャット</small>
-      </a>
-
-      <a href="{% url 'core:school_service' %}" class="service-card school-service"> 
-          <span class="icon">👨‍🏫</span>
-          <span class="text">学校向けの機能</span>
-          <small>学生管理・就職支援</small>
-      </a>
-
-  </div>
-
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ★ 1. body にトップページ専用クラスを追加 (これでヘッダー/フッターが赤くなります)
+        document.body.classList.add('top-page-mode');
+
+        // 2. main-container の余白リセット (背景画像用)
+        const mainContainer = document.querySelector('.main-container');
+        if (mainContainer) {
+            mainContainer.style.padding = '0';
+            mainContainer.style.maxWidth = 'none';
+            mainContainer.style.backgroundColor = 'transparent';
+        }
+        
+        // 3. main タグの余白リセット
+        const mainTag = document.querySelector('main');
+        if (mainTag) {
+            mainTag.style.padding = '0';
+        }
+    });
+</script>
+
 {% endblock %}
