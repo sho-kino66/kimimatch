@@ -2052,3 +2052,33 @@ body.auth-page-mode footer {
 .auth-footer-links span {
   color: #ccc; /* 区切り線の色 */
 }
+
+/* === 16. ページネーション (dashboard.html) === */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+.pagination .step-links {
+  display: inline-block;
+}
+.pagination .page-link {
+  display: inline-block;
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #007bff;
+  text-decoration: none;
+  background-color: #fff;
+  transition: background-color 0.2s;
+}
+.pagination .page-link:hover {
+  background-color: #f0f0f0;
+  text-decoration: none;
+}
+.pagination .current {
+  margin: 0 10px;
+  font-weight: 600;
+  color: #555;
+}
