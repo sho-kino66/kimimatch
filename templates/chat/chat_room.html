@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}チャットルーム{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>チャットルーム</h2>
+    
+    <div id="chat-log" class="chat-log-container">
+      
+      {% for msg in messages %}
+        {% if msg.author == request.user %}
+          <div class="message-row my-message">
+        {% else %}
+          <div class="message-row their-message">
+        {% endif %}
+            <div class="message-bubble">
+              {% if msg.author != request.user %}
+                <div class="message-author">{{ msg.author_display_name }}</div>
+              {% endif %}
+              
+              <div class="message-content">{{ msg.content }}</div>
+              <div class="message-timestamp">{{ msg.timestamp|date:"H:i" }}</div>
+            </div>
+          </div>
+      {% endfor %}
+      
+    </div>
+    <div class="chat-input-container">
+      <input id="chat-message-input" type="text" placeholder="メッセージを入力...">
+      <input id="chat-message-submit" type="button" value="送信">
+    </div>
+    
+    {{ room_id|json_script:"room-id" }}
+    {{ request.user.id|json_script:"current-user-id" }} 
+    
+    <script>
+      const roomID = JSON.parse(document.getElementById('room-id').textContent);
+      const currentUserID = JSON.parse(document.getElementById('current-user-id').textContent);
+      
+      const chatLog = document.querySelector('#chat-log');
+      const chatInput = document.querySelector('#chat-message-input');
+      const chatSubmit = document.querySelector('#chat-message-submit');
+
+      // --- 1. WebSocket サーバーに接続 ---
+      const chatSocket = new WebSocket(
+          'ws://'
+          + window.location.host
+          + '/ws/chat/room/'
+          + roomID
+          + '/'
+      );
+
+      // --- 2. サーバーからメッセージを受信した時の処理 ---
+      chatSocket.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+          
+          createMessageBubble(data);
+          
+          chatLog.scrollTop = chatLog.scrollHeight;
+      };
+
+      // --- 3. 接続が切れた時の処理 ---
+      chatSocket.onclose = function(e) {
+          console.error('チャットソケットが予期せず閉じました。');
+          chatInput.disabled = true;
+          chatSubmit.disabled = true;
+          const errorRow = document.createElement('div');
+          errorRow.className = 'message-row system-message';
+          errorRow.innerHTML = '<div class="message-bubble-system">サーバーとの接続が切れました。</div>';
+          chatLog.appendChild(errorRow);
+          chatLog.scrollTop = chatLog.scrollHeight;
+      };
+
+      // --- 4. 送信ボタンがクリックされた時の処理 ---
+      chatSubmit.onclick = function(e) {
+          sendMessage();
+      };
+
+      // --- 5. Enterキーでも送信できるようにする ---
+      chatInput.onkeyup = function(e) {
+          if (e.key === 'Enter') {
+              sendMessage();
+          }
+      };
+      
+      // --- 6. メッセージ送信処理 ---
+      function sendMessage() {
+          const message = chatInput.value;
+          if (message.trim() === '') {
+              return; // 空のメッセージは送信しない
+          }
+          
+          chatSocket.send(JSON.stringify({
+              'message': message
+          }));
+          
+          chatInput.value = '';
+          chatInput.focus();
+      }
+      
+      // --- 7. (新規) 吹き出しHTMLを生成する関数 ---
+      function createMessageBubble(data) {
+          const messageRow = document.createElement('div');
+          messageRow.classList.add('message-row');
+
+          if (data.author_id === currentUserID) {
+              messageRow.classList.add('my-message');
+          } else {
+              messageRow.classList.add('their-message');
+          }
+
+          const bubble = document.createElement('div');
+          bubble.className = 'message-bubble';
+          
+          if (data.author_id !== currentUserID) {
+            const authorDiv = document.createElement('div');
+            authorDiv.className = 'message-author';
+            authorDiv.textContent = data.author_username;
+            bubble.appendChild(authorDiv);
+          }
+
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'message-content';
+          contentDiv.textContent = data.message;
+          
+          const timestampDiv = document.createElement('div');
+          timestampDiv.className = 'message-timestamp';
+          timestampDiv.textContent = data.timestamp;
+
+          bubble.appendChild(contentDiv);
+          bubble.appendChild(timestampDiv);
+          messageRow.appendChild(bubble);
+          
+          chatLog.appendChild(messageRow);
+      }
+      
+      // --- 8. ページ読み込み時にログを一番下までスクロール ---
+      chatLog.scrollTop = chatLog.scrollHeight;
+    </script>
+    <hr>
+    
+    <a href="{{ back_url }}" class="back-link">← 戻る</a>
+
+  </div>
+</div>
+{% endblock %}

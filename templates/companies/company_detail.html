@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ company.name }} 企業詳細{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>{{ company.name }}</h2>
+    
+    {% if user.student %} 
+      <div class="action-box">
+        
+        {% if is_favorited %}
+          <form action="{% url 'companies:remove_favorite' company.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-cancel">お気に入りから削除</button>
+          </form>
+        {% else %}
+          <form action="{% url 'companies:add_favorite' company.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-favorite">お気に入りに登録</button>
+          </form>
+        {% endif %}
+        
+        {% if existing_chat_room_id %}
+          <a href="{% url 'chat:chat_room' existing_chat_room_id %}?next={{ request.path }}" class="btn-chat">チャットを続ける</a>
+        {% elif first_rep_user_id %}
+          <a href="{% url 'chat:start_chat' first_rep_user_id %}?next={{ request.path }}" class="btn-chat">チャットを開始する</a>
+        {% else %}
+          <p class="no-chat">（チャット担当者不在）</p>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    {% if user.teacher %}
+      <div class="action-box">
+        {% if existing_chat_room_id %}
+          <a href="{% url 'chat:chat_room' existing_chat_room_id %}?next={{ request.path }}" class="btn-chat">チャットを続ける</a>
+        {% elif first_rep_user_id %}
+          <a href="{% url 'chat:start_chat' first_rep_user_id %}?next={{ request.path }}" class="btn-chat">この企業の担当者とチャットを開始する</a>
+        {% else %}
+          <p class="no-chat">（この企業にはチャット可能な担当者がいません）</p>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <div class="company-detail-page">
+      <div class="info-table">
+        <table>
+          <tr>
+            <th>業種</th>
+            <td>{{ company.industry }}</td>
+          </tr>
+          <tr>
+            <th>事業内容</th>
+            <td>{{ company.description | linebreaksbr }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    
+    <hr>
+    
+    {% if request.GET.next %}
+      <a href="{{ request.GET.next }}" class="back-link">← お気に入り一覧に戻る</a>
+    {% else %}
+      <a href="{% url 'companies:list' %}" class="back-link">← 企業一覧に戻る</a>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

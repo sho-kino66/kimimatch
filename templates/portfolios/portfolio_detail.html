@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ portfolio.title }} - 作品管理{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>{{ portfolio.title }}</h2>
+    
+    <p class="portfolio-description">{{ portfolio.description | linebreaksbr }}</p>
+
+    <div>
+      <a href="{% url 'portfolios:update' portfolio.pk %}?next={% url 'portfolios:detail' portfolio.pk %}" class="btn btn-edit">
+        タイトル・説明を編集
+      </a>
+      <a href="{% url 'portfolios:delete' portfolio.pk %}" class="btn btn-delete">
+        このポートフォリオを削除
+      </a>
+    </div>
+
+    {% if portfolio.teacher_comment %}
+      <div class="teacher-comment-portfolio">
+        <strong>
+          教員コメント
+          {% if portfolio.commenting_teacher %}
+          <span>({{ portfolio.commenting_teacher.full_name }} 先生)</span>
+          {% endif %}
+        </strong>
+        <p>{{ portfolio.teacher_comment }}</p>
+      </div>
+    {% endif %}
+
+    <hr>
+    
+    <h3>成果物（ファイル）</h3>
+    
+    {% if items %}
+      <ul class="file-list">
+        {% for item in items %}
+          <li>
+            <a href="{{ item.file.url }}" target="_blank">
+              📄 {{ item.file.name }}
+            </a>
+            <form action="{% url 'portfolios:delete_item' item.pk %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-delete" style="font-size: 0.8em;">[削除]</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="padding-left: 10px;">（まだ作品がアップロードされていません）</p>
+    {% endif %}
+
+    <hr>
+
+    <h4>新しい作品をアップロード</h4>
+
+    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+      ※ ソースコードを提出する場合は、フォルダを <strong>ZIPファイル</strong> に圧縮してアップロードしてください。<br>
+      ※ 企画書やデザイン画は PDF や JPG でアップロード可能です。
+    </p>
+    
+    <form action="{% url 'portfolios:add_item' portfolio.pk %}" 
+          method="post" 
+          enctype="multipart/form-data"
+          class="upload-form">
+      
+      {% csrf_token %}
+      
+      {{ item_form.as_p }}
+      
+      <button type="submit">アップロード</button>
+    </form>
+
+    <hr>
+    
+    <a href="{% url 'accounts:my_page' %}" class="back-link">← マイページ（ポートフォリオ一覧）に戻る</a>
+
+  </div>
+</div>
+{% endblock %}

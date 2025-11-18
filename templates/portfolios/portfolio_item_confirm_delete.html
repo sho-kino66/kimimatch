@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}作品ファイルの削除確認{% endblock %}
+
+{% block content %}
+  <h2>作品ファイルの削除確認</h2>
+  
+  <p>
+    本当に「<strong>{{ item.file.name }}</strong>」を削除してもよろしいですか？
+  </p>
+  <p>（この操作は取り消せません）</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" style="background-color: red; color: white;">はい、削除します</button>
+    
+    <a href="{% url 'portfolios:detail' item.portfolio.pk %}">キャンセル</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}学生を検索する{% endblock %}
+
+{% block content %}  
+  <h2>学生検索</h2>
+  
+  <form method="get" action="{% url 'accounts:company_student_list' %}">
+    <input type="text" name="query" value="{{ query }}" placeholder="氏名、学校名、キーワード...">
+    <button type="submit">検索</button>
+  </form>
+  <hr>
+
+  {% if students %}
+    <table border="1" cellpadding="5">
+      <thead>
+        <tr>
+          <th>学校名</th>
+          <th>学年</th>
+          <th>氏名</th>
+          <th>ポートフォリオ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+          <tr>
+            <td>{{ student.school.name }}</td>
+            <td>{{ student.grade }}年</td>
+            <td>
+              <a href="{% url 'accounts:student_detail' student.pk %}">
+                {{ student.full_name }}
+              </a>
+            </td>
+            
+            <td>
+              {% with student.portfolio_set.first as first_portfolio %}
+                {% if first_portfolio %}
+                  <a href="{% url 'accounts:student_detail' student.pk %}">
+                    {{ first_portfolio.title }}
+                  </a>
+                  {% if student.portfolio_set.count > 1 %}
+                    (他 {{ student.portfolio_set.count | add:"-1" }} 件)
+                  {% endif %}
+                {% else %}
+                  （未作成）
+                {% endif %}
+              {% endwith %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    {% else %}
+    {% if query %}
+      <p>「{{ query }}」に一致する学生は見つかりませんでした。</p>
+    {% else %}
+      <p>学生はまだ登録されていません。</p>
+    {% endif %}
+  {% endif %}
+  <hr>
+  <p><a href="{% url 'accounts:dashboard' %}">メインメニューに戻る</a></p>
+{% endblock %}

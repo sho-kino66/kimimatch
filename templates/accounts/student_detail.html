@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load static %} 
+
+{% block title %}{{ student.full_name }}さんのポートフォリオ{% endblock %}
+
+{% block content %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('student-detail-page');
+  });
+</script>
+
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>{{ student.full_name }} さんの詳細</h2>
+    
+    {% if user.companyrepresentative %} 
+      <div class="action-box">
+        
+        {% if is_scouted %}
+          <form action="{% url 'accounts:remove_scout' student.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-cancel">スカウトを取り消す</button>
+          </form>
+        {% else %}
+          <form action="{% url 'accounts:add_scout' student.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-scout">この学生をスカウトする</button>
+          </form>
+        {% endif %}
+        
+        {% url 'accounts:student_detail' student.pk as student_detail_url %}
+        
+        {% if student_chat_room_id %}
+          <a href="{% url 'chat:chat_room' student_chat_room_id %}?next={{ student_detail_url }}" class="btn-chat">この学生とチャットを続ける</a>
+        {% else %}
+          <a href="{% url 'chat:start_chat' student.user.id %}?next={{ student_detail_url }}" class="btn-chat">この学生とチャットを開始する</a>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+    <div class="info-table">
+      <table>
+        <tr>
+          <th>氏名</th>
+          <td>{{ student.full_name }}</td>
+        </tr>
+        <tr>
+          <th>学校名</th>
+          <td>{{ student.school.name | default:"未設定" }}</td>
+        </tr>
+        <tr>
+          <th>学年</th>
+          <td>{{ student.grade }}年</td>
+        </tr>
+      </table>
+    </div>
+
+    {% if student.comment %}
+      <div class="teacher-comment-general">
+        <h4>
+          担当教員からのコメント
+          {% if student.comment_teacher %}
+            <span>（記入者: {{ student.comment_teacher.full_name }} 先生）</span>
+          {% endif %}
+        </h4>
+        <p style="white-space: pre-wrap;">{{ student.comment }}</p>
+        
+        {% if user.teacher and user.teacher.school == student.school %}
+          <a href="{% url 'accounts:student_comment_update' student.pk %}" 
+             class="comment-edit-link" 
+             style="background-color: #dbeafe; padding: 4px 8px; border-radius: 5px;">
+            [このコメントを編集する]
+          </a>
+        {% endif %}
+      </div>
+    {% else %}
+      {% if user.teacher and user.teacher.school == student.school %}
+        <div class="teacher-comment-general" style="background-color: #f9f9f9;">
+          <a href="{% url 'accounts:student_comment_update' student.pk %}" 
+             class="comment-edit-link"
+             style="font-weight: 600;">
+            [担当教員コメントを追加する]
+          </a>
+        </div>
+      {% endif %}
+    {% endif %}
+    
+    {% if user.companyrepresentative and school_teachers %}
+    <div class="teacher-chat-box">
+      <h4>
+        {{ student.school.name }} の担当教員
+        <span>（学生に関する質問はこちらへ）</span>
+      </h4>
+      <ul>
+        {% for teacher in school_teachers %}
+          <li>
+            {{ teacher.full_name }} 先生
+            <a href="{% url 'chat:start_chat' teacher.user.id %}?next={{ student_detail_url }}">
+              チャット
+            </a>
+          </li>
+        {% empty %}
+          <li>（まだ担当教員が登録されていません）</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    
+
+    <hr>
+    <h3>ポートフォリオ一覧</h3>
+    
+    {% if portfolios %}
+      {% for portfolio in portfolios %}
+        <div class="portfolio-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
+          <h4>{{ portfolio.title }}</h4>
+          <p>{{ portfolio.description | linebreaksbr }}</p>
+          
+          {% if portfolio.teacher_comment %}
+            <div class="teacher-comment-portfolio">
+              <strong>
+                教員コメント
+                {% if portfolio.commenting_teacher %}
+                <span>({{ portfolio.commenting_teacher.full_name }} 先生)</span>
+                {% endif %}
+              </strong>
+              <p>{{ portfolio.teacher_comment }}</p>
+            </div>
+          {% endif %}
+
+          {% if user.teacher and user.teacher.school == student.school %}
+            <a href="{% url 'portfolios:portfolio_comment_update' portfolio.pk %}" class="comment-edit-link">
+              この作品にコメントする
+            </a>
+          {% endif %}
+
+          <h5 style="margin-top: 15px;">成果物</h5>
+          {% if portfolio.items.all %}
+            <ul style="list-style-type: none; padding-left: 0;">
+              {% for item in portfolio.items.all %}
+                <li style="background: #f4f4f4; border: 1px solid #eee; padding: 8px; margin-bottom: 5px;">
+                  <a href="{{ item.file.url }}" target="_blank">
+                    {{ item.file.name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>（このポートフォリオに成果物はありません）</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>（この学生はまだポートフォリオを作成していません）</p>
+    {% endif %}
+
+    <hr>
+    
+    {% if user.teacher %}
+      <a href="{% url 'accounts:teacher_student_list' %}" class="back-link">← 担当学生一覧に戻る</a>
+    {% elif user.companyrepresentative %}
+      <a href="{% url 'accounts:company_student_list' %}" class="back-link">← 学生検索一覧に戻る</a>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

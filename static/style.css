@@ -1,0 +1,1779 @@
+/* === 0. 基本設定 (フォント、リセット) === */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Noto Sans JP", sans-serif;
+  color: #333;
+}
+body {
+  background-color: #f8f9fa; /* ★ 外側の背景は薄いグレー */
+}
+a {
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* === 1. base.html レイアウト === */
+.main-container {
+  width: 100%;
+  max-width: 960px; /* デフォルトの最大幅 */
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background-color: #ffffff; /* ★ コンテンツ背景は白に固定 */
+}
+/* ヘッダーの基本スタイル（枠組み） */
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  
+  /* デフォルトのスタイル (ゲスト/管理者用) */
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+header h1 {
+  margin: 0;
+  font-size: 1.5em;
+}
+header h1 a {
+  color: #333; /* デフォルトのロゴ色 */
+  text-decoration: none;
+}
+header nav a {
+  color: #007bff; /* デフォルトのリンク色 */
+  margin-left: 15px;
+  font-weight: 500;
+}
+header nav span {
+  font-size: 0.9em;
+  color: #555;
+}
+
+main {
+  padding: 20px;
+  flex-grow: 1;
+}
+footer {
+  width: 100%;
+  text-align: center;
+  padding: 15px;
+  background-color: #f4f4f4;
+  border-top: 1px solid #dee2e6;
+  box-sizing: border-box;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+/* === 2. ページコンテナ (幅が広いページ用) === */
+.page-container {
+  padding: 20px;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+/* ログイン中は main の padding を 0 にし、max-width 制限を解除 */
+body:not(.role-guest) .main-container {
+  padding: 0;
+  max-width: none;
+}
+
+/* === 3. カード / 見出し / フォーム共通 === */
+.profile-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 24px 32px;
+  overflow-x: auto;
+}
+h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding-left: 10px;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+h3, h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 8px;
+}
+hr {
+  border: none;
+  margin: 2rem 0;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+/* テーブル共通 */
+.info-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.info-table th {
+  text-align: left;
+  padding: 12px 16px;
+  width: 30%;
+  font-weight: 600;
+  vertical-align: top;
+}
+.info-table td {
+  background-color: #ffffff;
+  padding: 12px 16px;
+}
+/* フォーム共通 */
+form textarea,
+form input[type="text"],
+form input[type="number"],
+form select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: "Noto Sans JP", sans-serif;
+  box-sizing: border-box;
+}
+form button[type="submit"] {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+/* === 4. カラーテーマ (ロール別) === */
+
+/* --- 4-1. 学生 (グリーン系) --- */
+.role-student header {
+  background-color: #15803d;
+  border-bottom: 1px solid #064e3b;
+}
+.role-student header h1 a,
+.role-student header nav a,
+.role-student header nav span {
+  color: #ffffff;
+}
+.role-student h2 {
+  border-left: 5px solid #16a34a;
+  color: #14532d;
+}
+.role-student h3, .role-student h4 {
+  color: #14532d;
+  border-bottom: 2px solid #dcfce7;
+}
+.role-student hr {
+  border-top: 1px solid #a7f3d0;
+}
+.role-student a {
+  color: #15803d;
+}
+.role-student .back-link {
+  color: #065f46;
+}
+.role-student .back-link:hover {
+  color: #064e3b;
+}
+.role-student .info-table,
+.role-student .portfolio-table,
+.role-student .favorite-table {
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 20px;
+  table-layout: fixed; /* 列幅を固定 */
+  width: 100%;         /* 基本は親要素いっぱい */
+  min-width: 700px;    /* 重要: 画面が狭くてもこれ以上縮めない（スクロール発生） */
+}
+
+.role-student .info-table {
+  max-width: 900px; /* 幅を700pxに制限 */
+  margin-left: auto; /* 中央寄せ */
+  margin-right: auto; /* 中央寄せ */
+}
+
+.role-student .info-table th,
+.role-student .portfolio-table th,
+.role-student .favorite-table th {
+  background-color: #bbf7d0;
+  color: #064e3b;
+  border-right: 1px solid #a7f3d0;
+}
+.role-student .info-table tr:not(:last-child),
+.role-student .portfolio-table tr:not(:last-child),
+.role-student .favorite-table tr:not(:last-child) {
+  border-bottom: 1px solid #a7f3d0;
+}
+.role-student .portfolio-table th,
+.role-student .favorite-table th {
+  background-color: #b7e4c7;
+  color: #1b4332;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  border-right: none;
+}
+/* タイトル (短すぎず長すぎず) */
+.role-student .portfolio-table th:nth-child(1) { 
+  width: 20%; 
+  min-width: 150px; 
+} 
+
+/* 説明 (一番広く取る) */
+.role-student .portfolio-table th:nth-child(2) { 
+  width: 45%; 
+  min-width: 250px; /* ★ここが潰れないように幅を確保 */
+} 
+
+/* 操作 (ボタン3つが崩れない幅を確保) */
+.role-student .portfolio-table th:nth-child(3) { 
+  width: 35%; 
+  min-width: 260px; /* ★ボタンが改行しないように十分な幅を確保 */
+} 
+
+.role-student .portfolio-table td,
+.role-student .favorite-table td {
+  padding: 12px 15px;
+  border-top: 1px solid #a7f3d0;
+  background-color: #ffffff;
+  vertical-align: middle;
+  
+  /* 基本設定 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 説明文(2列目)の設定 */
+.role-student .portfolio-table td:nth-child(2) {
+  white-space: nowrap;       
+  overflow: hidden;          
+  text-overflow: ellipsis;   
+  /* max-width: 0;  ← ★これを削除します（min-widthを設定したので不要） */
+}
+
+/* 操作列(3列目)の設定 */
+.role-student .portfolio-table td:nth-child(3) {
+  white-space: normal;       
+  text-align: center;
+  overflow: visible;
+}
+.role-student .portfolio-table tr:hover,
+.role-student .favorite-table tr:hover {
+  background-color: #f0fdf4;
+}
+.role-student .chat-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+.role-student .chat-list-table th {
+  background-color: #b7e4c7;
+  color: #1b4332;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  border-right: none;
+}
+.role-student .chat-list-table td {
+  padding: 12px 15px;
+  border-top: 1px solid #a7f3d0;
+  background-color: #ffffff;
+  vertical-align: middle;
+}
+.role-student .chat-list-table tr:hover {
+  background-color: #f0fdf4;
+}
+.role-student .btn { display: inline-block; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: background 0.2s ease; border: 1px solid transparent; }
+.role-student .btn-detail { background: #16a34a; color: #fff; }
+.role-student .btn-detail:hover { background: #15803d; text-decoration: none; color: #fff; }
+.role-student .btn-edit { background: #f0f0f0; color: #333; border: 1px solid #ccc; }
+.role-student .btn-edit:hover { background: #e0e0e0; text-decoration: none; }
+.role-student .btn-delete { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.role-student .btn-delete:hover { background: #fee2e2; text-decoration: none; }
+.role-student .btn-create { display: inline-block; background: #15803d; color: #fff; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 1rem; }
+.role-student .btn-create:hover { background: #14532d; text-decoration: none; color: #fff; }
+.role-student .teacher-comment-general,
+.role-student .teacher-comment-portfolio {
+  margin-top: 15px;
+  padding: 12px 15px;
+  background-color: #dbeafe;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+}
+.role-student .teacher-comment-general h4,
+.role-student .teacher-comment-portfolio strong {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+  border-bottom: none;
+  font-size: 0.9em;
+}
+.role-student .teacher-comment-general h4 span,
+.role-student .teacher-comment-portfolio strong span {
+  font-size: 1em;
+  font-weight: normal;
+  color: #1d4ed8;
+}
+.role-student .teacher-comment-general p,
+.role-student .teacher-comment-portfolio p {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  color: #333;
+  font-size: 0.95em;
+}
+.role-student .action-box {
+  margin: 15px 0;
+  padding: 15px 20px;
+  border-radius: 12px;
+  background-color: #f0fdf4;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.role-student .action-box form {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+.role-student .action-box button,
+.role-student .action-box .btn-chat {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  font-size: 14px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.role-student .action-box .btn-favorite { /* お気に入りボタン (Yellow) */
+  background-color: #f6c200;
+  color: #333;
+  border-color: #d9a900;
+}
+.role-student .action-box .btn-favorite:hover { background-color: #d9a900; color: #fff; }
+.role-student .action-box .btn-cancel { /* 削除ボタン (Red) */
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+.role-student .action-box .btn-cancel:hover { background: #fee2e2; border-color: #f87171; }
+.role-student .action-box .btn-chat { /* チャットボタン (Green) */
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+.role-student .action-box .btn-chat:hover { background-color: #218838; text-decoration: none; color: #fff;}
+.role-student .action-box .no-chat {
+  color: #555;
+  display: inline-block;
+  margin: 0;
+}
+/* ★★★ ↓↓ portfolio_detail.html 用のCSSを追記 ↓↓ ★★★ */
+.role-student .portfolio-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  padding-left: 15px;
+  margin-bottom: 1rem;
+  background-color: #f0fdf4; /* 薄い緑の背景 */
+  border: 1px solid #b7e4c7;
+  border-radius: 8px;
+  padding: 15px;
+  white-space: pre-wrap; /* 改行を反映 */
+}
+.role-student .file-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+.role-student .file-list li {
+  background: #f0fdf4;
+  border: 1px solid #b7e4c7;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.role-student .file-list a {
+  font-weight: 600;
+}
+.role-student .upload-form {
+  background: #f0fdf4;
+  border: 1px dashed #b7e4c7;
+  padding: 15px;
+  border-radius: 8px;
+}
+.role-student .upload-form p {
+  margin: 0 0 10px 0;
+}
+.role-student .upload-form label {
+  font-weight: 600;
+  color: #14532d;
+  display: block;
+  margin-bottom: 8px;
+}
+.role-student .upload-form input[type="file"] {
+  display: block;
+}
+.role-student .upload-form button[type="submit"] {
+  display: inline-block;
+  background-color: #15803d;
+  color: #ffffff;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.role-student .upload-form button[type="submit"]:hover { background-color: #14532d; }
+/* ★★★ ↑↑↑ portfolio_detail.html 用CSSここまで ↑↑↑ ★★★ */
+
+/* --- 4-2. 教員 (ブルー系) --- */
+/* ... (変更なし) ... */
+/* ... (以降のCSSは変更なし) ... */
+/* --- 4-2. 教員 (ブルー系) --- */
+.role-teacher header {
+  background-color: #2563eb; /* 濃い青 */
+  border-bottom: 1px solid #1e40af;
+}
+.role-teacher header h1 a,
+.role-teacher header nav a,
+.role-teacher header nav span {
+  color: #ffffff;
+}
+.role-teacher h2 {
+  border-left: 5px solid #3b82f6;
+  color: #1e3a8a;
+}
+.role-teacher h3, .role-teacher h4 {
+  color: #1e3a8a;
+  border-bottom: 2px solid #dbeafe;
+}
+.role-teacher hr {
+  border-top: 1px solid #bfdbfe;
+}
+.role-teacher a {
+  color: #2563eb;
+}
+.role-teacher .back-link {
+  color: #1d4ed8;
+}
+.role-teacher .back-link:hover {
+  color: #1e40af;
+}
+.role-teacher .info-table {
+  background-color: #dbeafe;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 20px;
+}
+.role-teacher .info-table th {
+  background-color: #bfdbfe;
+  color: #1e40af;
+  border-right: 1px solid #93c5fd;
+}
+.role-teacher .info-table tr:not(:last-child) {
+  border-bottom: 1px solid #bfdbfe;
+}
+/* ★★★ ↓↓ 担当学生一覧テーブル (teacher_student_list.html) ↓↓ ★★★ */
+.role-teacher .student-list-table {
+  width: 100%;
+  /* ★ (追記) 最小幅を指定し、テーブルが縮みすぎないようにする */
+  min-width: 800px;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  /* ★ (削除) table-layout: fixed; */
+}
+.role-teacher .student-list-table th {
+  background-color: #bfdbfe;
+  color: #1e40af;
+  border-right: none;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  white-space: nowrap; /* ★ ヘッダーは改行しない */
+}
+.role-teacher .student-list-table td {
+  background: #fff;
+  border-top: 1px solid #bfdbfe;
+  padding: 12px 15px;
+  vertical-align: middle;
+  /* ★ (削除) overflow: hidden; */
+}
+.role-teacher .student-list-table tr:hover {
+  background-color: #eff6ff;
+}
+
+/* ★ (削除) カラム幅調整 (th:nth-child...) の指定をすべて削除 */
+
+/* ★ (追記) 特定の列だけ改行しないように設定 */
+.role-teacher .student-list-table td:nth-child(1), /* 学年 */
+.role-teacher .student-list-table td:nth-child(2), /* 氏名 */
+.role-teacher .student-list-table td:nth-child(4), /* 詳細 */
+.role-teacher .student-list-table td:nth-child(5) { /* コメント */
+  white-space: nowrap;
+}
+.role-teacher .student-list-table td:nth-child(3) { /* ポートフォリオ */
+  white-space: normal;
+}
+
+/* ★ (削除) .portfolio-scroll-wrapper のスタイルを削除 */
+
+.role-teacher .student-list-table ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  white-space: normal; /* ★ 通常の折り返し */
+}
+.role-teacher .student-list-table ul li {
+  margin-bottom: 4px;
+  list-style-type: disc;
+  display: list-item;
+  
+  /* ★ (追記) 長いタイトルは ... で省略 */
+  max-width: 350px; /* この列の最大幅 (お好みで調整) */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role-teacher .student-list-table small {
+  color: #555; 
+  padding-left: 1.2rem;
+}
+.role-teacher .student-list-table .detail-btn {
+  display: inline-block;
+  background: #c0d3ee;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
+}
+.role-teacher .student-list-table .detail-btn:hover {
+  background: #1d4ed8;
+  text-decoration: none;
+  color: #fff;
+}
+.role-teacher .student-list-table .comment-btn {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  transition: background 0.2s ease;
+}
+.role-teacher .student-list-table .comment-btn:hover {
+  background: #e0e0e0;
+  text-decoration: none;
+}
+/* ★★★ ↑↑↑ 担当学生一覧テーブルここまで ↑↑↑ ★★★ */
+.role-teacher .chat-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  border: none;
+}
+.role-teacher .chat-list-table th {
+  background-color: #bfdbfe;
+  color: #1e40af;
+  border-right: none;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+}
+.role-teacher .chat-list-table td {
+  background: #fff;
+  border-top: 1px solid #bfdbfe;
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+.role-teacher .chat-list-table tr:hover {
+  background-color: #eff6ff;
+}
+.role-teacher form textarea,
+.role-teacher form input[type="text"] {
+  border: 1px solid #bfdbfe;
+}
+.role-teacher form textarea:focus,
+.role-teacher form input[type="text"]:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+.role-teacher form label {
+  color: #1e3a8a;
+}
+.role-teacher form button[type="submit"] {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+.role-teacher form button[type="submit"]:hover {
+  background-color: #1e40af;
+}
+.role-teacher .action-box {
+  margin: 15px 0;
+  padding: 15px 20px;
+  border-radius: 12px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.role-teacher .action-box form {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+.role-teacher .action-box button,
+.role-teacher .action-box .btn-chat {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  font-size: 14px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.role-teacher .action-box .btn-chat { /* チャットボタン (Green) */
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+.role-teacher .action-box .btn-chat:hover { background-color: #218838; text-decoration: none; color: #fff;}
+.role-teacher .action-box .no-chat {
+  color: #555;
+  display: inline-block;
+  margin: 0;
+}
+
+
+/* --- 4-3. 企業 (イエロー系) --- */
+.role-company header {
+  background-color: #d9a900; /* 濃い黄/金 */
+  border-bottom: 1px solid #856a00;
+}
+.role-company header h1 a,
+.role-company header nav a,
+.role-company header nav span {
+  color: #ffffff;
+}
+.role-company h2 {
+  border-left: 5px solid #f6c200;
+  color: #856a00;
+}
+.role-company h3, .role-company h4 {
+  color: #856a00;
+  border-bottom: 2px solid #fef3c7;
+}
+.role-company hr {
+  border-top: 1px solid #fde68a;
+}
+.role-company a {
+  color: #d9a900;
+}
+.role-company .back-link {
+  color: #856a00;
+}
+.role-company .back-link:hover {
+  color: #5c4a00;
+}
+.role-company .info-table {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 16px;
+  padding: 20px;
+}
+.role-company .info-table th {
+  background-color: #d9a900;
+  color: #ffffff;
+  border-right: 1px solid #fde68a;
+}
+.role-company .info-table tr:not(:last-child) {
+  border-bottom: 1px solid #fde68a;
+}
+.role-company .info-table td.description {
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.role-company table { /* スカウト一覧, 学生一覧テーブル */
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  table-layout: fixed; 
+}
+.role-company table th {
+  background-color: #d9a900;
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  border-right: none;
+}
+.role-company table td {
+  background: #fff;
+  border-top: 1px solid #fde68a;
+  padding: 12px 15px;
+  vertical-align: middle;
+  overflow: hidden;
+}
+.role-company table tr:hover {
+  background-color: #fffbeb;
+}
+.role-company .student-list-table th:nth-child(1), /* 学校名 */
+.role-company .student-list-table td:nth-child(1) {
+  width: 25%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role-company .student-list-table th:nth-child(2), /* 学年 */
+.role-company .student-list-table td:nth-child(2) {
+  width: 10%;
+  white-space: nowrap;
+}
+.role-company .student-list-table th:nth-child(3), /* 氏名 */
+.role-company .student-list-table td:nth-child(3) {
+  width: 20%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role-company .student-list-table th:nth-child(4), /* ポートフォリオ */
+.role-company .student-list-table td:nth-child(4) {
+  width: 45%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role-company .chat-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  border: none;
+}
+.role-company .chat-list-table th {
+  background-color: #d9a900;
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 15px;
+  font-weight: 600;
+  border-right: none;
+}
+.role-company .chat-list-table td {
+  background: #fff;
+  border-top: 1px solid #fde68a;
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+.role-company .chat-list-table tr:hover {
+  background-color: #fffbeb;
+}
+
+
+/* === 5. ページ個別スタイル === */
+
+/* --- 学生詳細ページ (student_detail.html) --- */
+
+/* ★ 企業（.role-company）のアクションボックス */
+.role-company .action-box {
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+  border-radius: 12px;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+
+  /* Flexbox設定 */
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Flexbox対応ブラウザ用 */
+  flex-wrap: wrap;
+}
+
+.role-company .action-box form {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+
+/* ★ ボタンとリンクの共通スタイル */
+.role-company .action-box button,
+.role-company .action-box .btn-chat { 
+  display: inline-block; 
+  padding: 10px 20px; /* 少し広めに */
+  border: 1px solid transparent;
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: 600; 
+  font-size: 14px; 
+  text-decoration: none;
+  line-height: 1.5;
+  text-align: center;
+  vertical-align: middle; 
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  
+  /* ★ 確実に隙間を空けるためのマージン (gapが効かない場合用) */
+  margin-right: 15px;
+  margin-bottom: 10px; /* 折り返し時の縦の隙間 */
+}
+
+/* 最後の要素のマージンを消す */
+.role-company .action-box > :last-child,
+.role-company .action-box form:last-child button {
+    margin-right: 0;
+}
+
+/* ★ スカウトボタン (黄色) */
+.role-company .action-box .btn-scout { 
+  background-color: #f6c200;
+  color: #333;
+  border-color: #d9a900; 
+}
+.role-company .action-box .btn-scout:hover { 
+  background-color: #d9a900;
+  color: #fff;
+}
+
+/* ★ スカウト取り消しボタン (赤色) */
+.role-company .action-box .btn-cancel { 
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+.role-company .action-box .btn-cancel:hover { background: #fee2e2; border-color: #f87171; }
+
+/* ★ チャットボタン (緑色) */
+.role-company .action-box .btn-chat { 
+  background-color: #28a745; 
+  color: white; 
+  border-color: #28a745;
+}
+.role-company .action-box .btn-chat:hover { background-color: #218838; text-decoration: none; color: #fff;}
+
+.role-company .action-box .no-chat {
+  color: #555;
+  display: inline-block;
+  margin: 0;
+}
+.role-company .action-box .btn-cancel { 
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+.role-company .action-box .btn-cancel:hover { background: #fee2e2; border-color: #f87171; }
+.role-company .action-box .btn-chat,
+.role-teacher .action-box .btn-chat { 
+  background-color: #28a745; 
+  color: white; 
+  border-color: #28a745;
+}
+.role-company .action-box .btn-chat:hover,
+.role-teacher .action-box .btn-chat:hover { background-color: #218838; text-decoration: none; color: #fff;}
+
+/* 教員コメント (全体) */
+.role-company .teacher-comment-general,
+.role-teacher .teacher-comment-general {
+  margin: 1.5rem 0;
+  padding: 15px 20px;
+  background-color: #fdfbe6;
+  border: 1px solid #f9e29a;
+  border-radius: 12px;
+}
+.role-company .teacher-comment-general h4,
+.role-teacher .teacher-comment-general h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #6d4c10;
+  border-bottom: none;
+}
+.role-company .teacher-comment-general h4 span,
+.role-teacher .teacher-comment-general h4 span {
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #8a6d3b;
+}
+.role-company .teacher-comment-general p,
+.role-teacher .teacher-comment-general p {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  color: #333;
+}
+/* 企業 -> 教員チャット */
+.role-company .teacher-chat-box {
+  margin: 1.5rem 0;
+  padding: 15px 20px;
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 12px;
+}
+.role-company .teacher-chat-box h4 { margin-top: 0; color: #6d4c10; border-bottom: none; }
+.role-company .teacher-chat-box h4 span { font-size: 0.8em; font-weight: normal; color: #8a6d3b; }
+.role-company .teacher-chat-box ul { 
+  margin: 10px 0 0 0; 
+  padding: 0;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.role-company .teacher-chat-box li { 
+  margin-bottom: 0;
+  background-color: #fff;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #333;
+}
+.role-company .teacher-chat-box a { 
+  margin-left: 0;
+  background-color: #28a745; 
+  color: white; 
+  padding: 4px 8px; 
+  text-decoration: none; 
+  border-radius: 5px; 
+  font-size: 0.9em; 
+  font-weight: 500;
+}
+.role-company .teacher-chat-box a:hover { 
+  background-color: #218838; 
+  text-decoration: none;
+}
+/* ポートフォリオ内 教員コメント */
+.role-company .teacher-comment-portfolio,
+.role-teacher .teacher-comment-portfolio {
+   margin-top: 15px;
+   padding: 12px 15px;
+   background-color: #fdfbe6;
+   border: 1px solid #f9e29a;
+   border-radius: 8px;
+}
+.role-company .teacher-comment-portfolio strong,
+.role-teacher .teacher-comment-portfolio strong {
+  font-size: 0.9em;
+  color: #6d4c10;
+}
+.role-company .teacher-comment-portfolio strong span,
+.role-teacher .teacher-comment-portfolio strong span {
+  font-weight: normal;
+}
+.role-company .teacher-comment-portfolio p,
+.role-teacher .teacher-comment-portfolio p {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  font-size: 0.95em;
+}
+/* ★★★ ↓↓ (追記) 学生詳細ページのタイトル省略 ↓↓ ★★★ */
+.role-company .profile-card h4,
+.role-teacher .profile-card h4 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.role-teacher .comment-edit-link {
+  font-size: 0.9em;
+  margin-top: 10px;
+  display: inline-block;
+  color: #15803d;
+  font-weight: 500;
+}
+
+/* --- portfolio_detail.html 用のCSS --- */
+.role-student .portfolio-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  padding-left: 15px;
+  margin-bottom: 1rem;
+}
+.role-student .file-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+.role-student .file-list li {
+  background: #f0fdf4;
+  border: 1px solid #b7e4c7;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.role-student .file-list a {
+  font-weight: 600;
+}
+.role-student .upload-form {
+  background: #f0fdf4;
+  border: 1px dashed #b7e4c7;
+  padding: 15px;
+  border-radius: 8px;
+}
+.role-student .upload-form p {
+  margin: 0 0 10px 0;
+}
+.role-student .upload-form label {
+  font-weight: 600;
+  color: #14532d;
+  display: block;
+  margin-bottom: 8px;
+}
+.role-student .upload-form input[type="file"] {
+  display: block;
+}
+.role-student .upload-form button[type="submit"] {
+  display: inline-block;
+  background-color: #15803d;
+  color: #ffffff;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.role-student .upload-form button[type="submit"]:hover { background-color: #14532d; }
+
+
+/* --- チャットルーム (chat_room.html) --- */
+#chat-log {
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f4;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.chat-input-container {
+  display: flex;
+  margin-top: 10px;
+  width: 100%;
+}
+#chat-message-input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 12px 15px;
+  font-size: 16px;
+  border-radius: 5px 0 0 5px;
+  border-right: none;
+}
+#chat-message-submit {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+#chat-message-submit:hover {
+  background-color: #0056b3;
+}
+
+/* --- 文字数カウンター --- */
+.char-counter {
+  text-align: right;
+  color: #555;
+  font-size: 0.9em;
+  margin-top: 5px;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+.char-counter.over-limit {
+  color: #d9534f;
+  font-weight: bold;
+}
+form button[type="submit"]:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- ボタン --- */
+.btn-delete {
+  display: inline-block;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border: 1px solid #fca5a5;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.btn-delete:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+  text-decoration: none;
+}
+
+
+/* === 6. ログインページ (login.html) === */
+.role-guest .main-container.login-page-container {
+  padding: 0 !important;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-page {
+  padding: 40px 20px;
+  max-width: 460px;
+  width: 100%;
+  margin: 40px auto;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  font-family: "Noto Sans JP", sans-serif;
+  box-sizing: border-box;
+}
+.login-page h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #333;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-left: none;
+}
+.login-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.login-page form p {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.login-page label {
+  font-weight: 500;
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.95em;
+}
+.login-page input[type="text"],
+.login-page input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.login-page input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+.login-page button {
+  margin-top: 10px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.login-page button:hover {
+  background-color: #43a047;
+}
+.login-page .error {
+  color: #d9534f;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  padding: 10px;
+  border-radius: 8px;
+}
+.login-note {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+.login-note a {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+/* === 7. 新規登録ページ (signup.html) === */
+.role-guest .main-container.signup-page-container {
+  padding: 0 !important;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.signup-container {
+  max-width: 480px;
+  margin: 60px auto;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  background-color: #fff;
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+  font-family: "Noto Sans JP", sans-serif;
+  box-sizing: border-box;
+}
+.signup-container:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+.signup-container h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border-left: none;
+  text-align: center;
+}
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.signup-form input[type="text"],
+.signup-form input[type="password"],
+.signup-form input[type="number"],
+.signup-form select,
+.signup-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+.signup-form input:focus,
+.signup-form select:focus,
+.signup-form textarea:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 3px rgba(var(--main-rgb), 0.12);
+}
+.signup-btn {
+  background-color: var(--main-color);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.signup-btn:hover {
+  background-color: var(--main-hover);
+  transform: translateY(-1px);
+}
+.signup-container {
+  --main-color: #3b82f6;
+  --main-hover: #2563eb;
+  --main-rgb: 59, 130, 246;
+}
+.signup-container.student {
+  --main-color: #16a34a;
+  --main-hover: #15803d;
+  --main-rgb: 22, 163, 74;
+}
+.signup-container.teacher {
+  --main-color: #3b82f6;
+  --main-hover: #2563eb;
+  --main-rgb: 59, 130, 246;
+}
+.signup-container.company {
+  --main-color: #f6c200;
+  --main-hover: #d9a900;
+  --main-rgb: 246, 194, 0;
+}
+.signup-container.student { border-top: 8px solid var(--main-color); background-color: #e6f7ec; }
+.signup-container.teacher { border-top: 8px solid var(--main-color); background-color: #eff6ff; }
+.signup-container.company { border-top: 8px solid var(--main-color); background-color: #fffbeb; }
+.signup-form p {
+  margin: 0;
+  text-align: left;
+}
+.signup-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* === 8. 新規登録タイプ選択 (signup_type_select.html) === */
+.role-guest .main-container.signup-type-select-page {
+  padding: 0 !important;
+  background-color: #f8f9fa; /* ★背景色をグレーに */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Noto Sans JP", sans-serif;
+}
+.role-guest.signup-type-select-page main {
+  padding: 0;
+}
+.signup-select-container {
+  background: #ffffff;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(100, 140, 100, 0.15);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.signup-select-container h2 {
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  border-left: none;
+  text-align: center;
+}
+.signup-select-container p {
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 30px;
+}
+.signup-options {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.signup-link {
+  display: block;
+  text-decoration: none;
+  font-weight: 600;
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 1.05rem;
+}
+.signup-link.student {
+  background-color: #16a34a;
+}
+.signup-link.student:hover {
+  background-color: #15803d;
+}
+.signup-link.teacher {
+  background-color: #3b82f6;
+}
+.signup-link.teacher:hover {
+  background-color: #2563eb;
+}
+.signup-link.company {
+  background-color: #f6c200;
+  color: #333;
+}
+.signup-link.company:hover {
+  background-color: #d9a900;
+}
+
+/* === 9. 企業詳細ページ (company_detail.html) === */
+/* 企業詳細ページの「企業情報テーブル」だけは、
+   閲覧者に関わらず「黄色テーマ」を適用します。 */
+.company-detail-page .info-table {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 16px;
+  padding: 20px;
+}
+.company-detail-page .info-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.company-detail-page .info-table th {
+  background-color: #d9a900;
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 16px;
+  width: 30%;
+  font-weight: 600;
+  vertical-align: top;
+  border-right: 1px solid #fde68a;
+}
+.company-detail-page .info-table td {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.company-detail-page .info-table tr:not(:last-child) {
+  border-bottom: 1px solid #fde68a;
+}
+/* === 10. チャットルーム (chat_room.html) === */
+
+/* チャットログのコンテナ */
+.chat-log-container {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f4;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* メッセージ一行 */
+.message-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+.their-message { justify-content: flex-start; }
+.my-message { justify-content: flex-end; }
+
+/* 吹き出しの箱 */
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  position: relative;
+  
+  /* ★★★ 重要修正: バブル自体の空白は無視する ★★★ */
+  white-space: normal; 
+}
+.their-message .message-bubble {
+  background-color: #ffffff;
+  border: 1px solid #eee;
+  border-top-left-radius: 5px;
+}
+.my-message .message-bubble {
+  border-top-right-radius: 5px;
+}
+.role-student .my-message .message-bubble { background-color: #c6f6d5; }
+.role-teacher .my-message .message-bubble { background-color: #bee3f8; }
+.role-company .my-message .message-bubble { background-color: #fefcbf; }
+
+/* 送信者名 */
+.message-author {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+/* ★★★ メッセージ本文 (ここだけ改行を有効にする) ★★★ */
+.message-content {
+  white-space: pre-wrap; /* 改行コードを反映 */
+  word-wrap: break-word; 
+  margin: 0; /* 余計な余白を消す */
+}
+
+/* タイムスタンプ */
+.message-timestamp {
+  font-size: 0.75em;
+  color: #777;
+  text-align: right;
+  margin-top: 5px;
+  line-height: 1; /* 行間を詰める */
+  
+  /* ★★★ 重要修正: 時刻周りの空白も無視する ★★★ */
+  white-space: normal; 
+}
+
+/* システムメッセージ */
+.system-message { justify-content: center; }
+.message-bubble-system {
+  background: #eee;
+  color: #555;
+  font-size: 0.9em;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+/* 入力欄のスタイル */
+#chat-message-input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 12px 15px;
+  font-size: 16px;
+  border-radius: 5px 0 0 5px;
+  border-right: none;
+}
+#chat-message-submit {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+
+/* === 11. ハンバーガーメニュー & お知らせ === */
+
+/* ヘッダー内の調整 */
+header {
+  position: relative; /* メニューの基準位置 */
+  z-index: 100;
+}
+.welcome-msg {
+  margin-right: 15px;
+  font-size: 0.9rem;
+}
+
+/* ハンバーガーアイコン */
+.hamburger-icon {
+  display: inline-block;
+  width: 30px;
+  height: 24px;
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  transition: transform 0.2s ease;
+}
+/* ホバー時に少し拡大 */
+.hamburger-icon:hover {
+  transform: scale(1.1);
+}
+
+.hamburger-icon span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: #fff;
+  position: absolute;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.hamburger-icon span:nth-child(1) { top: 0; }
+.hamburger-icon span:nth-child(2) { top: 10px; }
+.hamburger-icon span:nth-child(3) { top: 20px; }
+
+
+/* メニュー本体 (最初は隠す) */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; /* 画面外に配置 */
+  width: 280px;
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: right 0.3s ease;
+  padding: 60px 20px 20px 20px;
+  box-sizing: border-box;
+}
+.nav-menu.active {
+  right: 0; /* 画面内へスライド */
+}
+
+/* 閉じるボタン */
+.nav-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+.nav-close:hover {
+  color: #333;
+}
+
+/* メニューリスト */
+.nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.nav-menu li {
+  margin-bottom: 10px;
+}
+.nav-menu a {
+  display: block;
+  padding: 12px 15px;
+  color: #333;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* ★ メニューリンクのホバー色 (ロール別) */
+.nav-menu a:hover {
+  text-decoration: none;
+  background-color: #f0f0f0; /* デフォルト */
+}
+/* 学生 (緑) */
+.role-student .nav-menu a:hover {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+/* 教員 (青) */
+.role-teacher .nav-menu a:hover {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+/* 企業 (黄) */
+.role-company .nav-menu a:hover {
+  background-color: #fffbeb;
+  color: #d9a900;
+}
+
+
+/* 背景の暗幕 */
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+  display: none;
+}
+.nav-overlay.active {
+  display: block;
+}
+
+/* --- ダッシュボード (お知らせ一覧) --- */
+.announcement-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.announcement-item {
+  border-bottom: 1px solid #eee;
+  padding: 15px 0;
+}
+.announcement-item:last-child {
+  border-bottom: none;
+}
+.announcement-date {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 5px;
+  display: block;
+}
+.announcement-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.announcement-title a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.2s ease;
+  display: block; /* クリックしやすくする */
+}
+
+/* ホバー時の色 (ユーザーのロールごとに変化) */
+/* 学生 (緑) */
+.role-student .announcement-title a:hover {
+  color: #16a34a;
+  text-decoration: underline;
+}
+/* 教員 (青) */
+.role-teacher .announcement-title a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+/* 企業 (黄) */
+.role-company .announcement-title a:hover {
+  color: #d9a900;
+  text-decoration: underline;
+}
+/* 管理者・その他 (グレー) */
+.role-admin .announcement-title a:hover,
+.role-guest .announcement-title a:hover {
+  color: #555;
+  text-decoration: underline;
+}
+.no-announcement {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}

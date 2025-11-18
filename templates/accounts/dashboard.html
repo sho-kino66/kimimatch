@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}メインメニュー{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+    
+    <h2>お知らせ</h2>
+
+    {% if announcements %}
+      <ul class="announcement-list">
+        {% for item in announcements %}
+          <li class="announcement-item">
+            <span class="announcement-date">{{ item.created_at|date:"Y年m月d日" }}</span>
+            
+            <div class="announcement-title">
+              <a href="{% url 'core:announcement_detail' item.pk %}">
+                {{ item.title }}
+              </a>
+            </div>
+            
+            </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="no-announcement">
+        <p>現在、新しいお知らせはありません。</p>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

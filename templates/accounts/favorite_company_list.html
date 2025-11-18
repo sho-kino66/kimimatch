@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}お気に入り企業一覧{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <h2> お気に入り企業一覧</h2>
+
+  {% if favorites %}
+    <table class="favorite-table">
+      <thead>
+        <tr>
+          <th>企業名</th>
+          <th>業種</th>
+          <th>お気に入り登録日</th>
+          <th>（操作）</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fav in favorites %}
+          <tr>
+            <td>
+              <a href="{% url 'companies:detail' fav.company.pk %}?next={% url 'accounts:favorite_list' %}">
+                {{ fav.company.name }}
+              </a>
+            </td>
+            <td>{{ fav.company.industry }}</td>
+            <td>{{ fav.created_at | date:"Y/m/d" }}</td>
+            <td>
+              <form action="{% url 'companies:remove_favorite' fav.company.pk %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete">削除</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>お気に入りに登録された企業はまだありません。</p>
+  {% endif %}
+  
+  <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+</div>
+{% endblock %}

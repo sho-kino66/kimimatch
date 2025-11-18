@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}削除の確認{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>削除の確認</h2>
+    
+    <p>
+      本当に「<strong>{{ object.title }}</strong>」を削除してもよろしいですか？<br>
+      <span style="color: #b91c1c; font-weight: 600;">この操作は取り消せません。</span>
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <button type="submit" class="btn btn-delete">はい、削除します</button>
+      
+      <a href="{% url 'portfolios:detail' object.pk %}" class="btn btn-cancel">
+        キャンセル
+      </a>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}コメント編集{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+  <div class="profile-card">
+    <h2>{{ student.full_name }} さんへのコメント編集</h2>
+    <p>...</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <p>
+        <label for="id_comment">{{ form.comment.label }}</label>
+        
+        <textarea name="comment" id="id_comment" rows="5">
+{{ form.comment.value|default:"" }}</textarea>
+        
+        <div class="char-counter" id="char-count-wrapper">
+          あと<span id="char-count">500</span>文字
+        </div>
+      </p>
+      
+      <button type="submit" id="submit-button">コメントを保存する</button>
+    </form>
+    
+    <hr>
+    <a href="{% url 'accounts:student_detail' student.pk %}" class="back-link">← 学生詳細に戻る</a>
+  </div>
+</div>
+
+<script>
+  const commentInput = document.getElementById('id_comment');
+  const charCountSpan = document.getElementById('char-count');
+  const charCounterWrapper = document.getElementById('char-count-wrapper');
+  const submitButton = document.getElementById('submit-button');
+  
+  // Pythonのフォームで設定した最大文字数を、JS側でも定義
+  const maxLength = 500;
+
+  // カウンターを更新する関数
+  function updateCounter() {
+    const currentLength = commentInput.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // 1. カウンターの数字を更新
+    charCountSpan.textContent = remaining;
+
+    // 2. 文字数超過のチェック
+    if (remaining < 0) {
+      // 制限オーバー
+      charCounterWrapper.classList.add('over-limit'); // 赤色にする
+      submitButton.disabled = true; // ★保存ボタンを無効化
+    } else {
+      // 制限内
+      charCounterWrapper.classList.remove('over-limit'); // 通常色に戻す
+      submitButton.disabled = false; // ★保存ボタンを有効化
+    }
+  }
+
+  // ページ読み込み時に一度実行
+  updateCounter();
+  
+  // ユーザーがキーを入力するたびに実行
+  commentInput.addEventListener('input', updateCounter);
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}作品コメント編集{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>「{{ portfolio.title }}」へのコメント編集</h2>
+    
+    <p>
+      担当教員として、この作品（ポートフォリオ）へのコメントを記入してください。
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <p>
+        <label for="id_teacher_comment">{{ form.teacher_comment.label }}</label>
+        
+        <textarea name="teacher_comment" id="id_teacher_comment" rows="5">
+{{ form.teacher_comment.value|default:"" }}</textarea>
+        
+        <div class="char-counter" id="char-count-wrapper">
+          あと<span id="char-count">500</span>文字
+        </div>
+      </p>
+      
+      <button type="submit" id="submit-button">コメントを保存する</button>
+    </form>
+
+    <hr>
+    
+    <a href="{% url 'accounts:student_detail' portfolio.student.pk %}" class="back-link">← 学生詳細に戻る</a>
+
+  </div>
+</div>
+
+<script>
+  const commentInput = document.getElementById('id_teacher_comment');
+  const charCountSpan = document.getElementById('char-count');
+  const charCounterWrapper = document.getElementById('char-count-wrapper');
+  const submitButton = document.getElementById('submit-button');
+  
+  const maxLength = 500; // forms.py で設定した値と合わせる
+
+  function updateCounter() {
+    const currentLength = commentInput.value.length;
+    const remaining = maxLength - currentLength;
+    
+    charCountSpan.textContent = remaining;
+
+    if (remaining < 0) {
+      charCounterWrapper.classList.add('over-limit');
+      submitButton.disabled = true;
+    } else {
+      charCounterWrapper.classList.remove('over-limit');
+      submitButton.disabled = false;
+    }
+  }
+
+  updateCounter();
+  commentInput.addEventListener('input', updateCounter);
+</script>
+
+{% endblock %}

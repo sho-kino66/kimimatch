@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}マイページ{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>マイページ</h2>
+
+    {% if user_type == 'student' %}
+      
+      <h3>学生情報</h3>
+      <div class="info-table">
+        <table>
+          <tr>
+            <th>氏名</th>
+            <td>{{ profile.full_name }}</td>
+          </tr>
+          <tr>
+            <th>学年</th>
+            <td>{{ profile.grade }}</td>
+          </tr>
+          <tr>
+            <th>学校</th>
+            <td>{{ profile.school.name | default:"未設定" }}</td>
+          </tr>
+          <tr>
+            <th>ログインID</th>
+            <td>{{ profile.user.username }}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div style="text-align: right; margin-top: 10px;">
+        <a href="{% url 'accounts:profile_update' %}" class="btn btn-edit">
+          プロフィールを編集
+        </a>
+      </div>
+
+      {% if profile.comment %}
+        <div class="teacher-comment-general">
+          <h4>
+            担当教員からのコメント
+            {% if profile.comment_teacher %}
+              <span>（記入者: {{ profile.comment_teacher.full_name }} 先生）</span>
+            {% endif %}
+          </h4>
+          <p>{{ profile.comment }}</p>
+        </div>
+      {% endif %}
+
+      <hr>
+
+      <h3>マイ・ポートフォリオ管理</h3>
+      
+      <a href="{% url 'portfolios:create' %}" class="btn-create">
+        ＋ 新しいポートフォリオを作成
+      </a>
+
+      {% if portfolios %}
+        <table class="portfolio-table">
+          <thead>
+            <tr>
+              <th>タイトル</th>
+              <th>説明（冒頭）</th>
+              <th style="width: 280px;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for portfolio in portfolios %}
+              <tr>
+                <td>{{ portfolio.title }}</td>
+                <td>{{ portfolio.description | truncatewords:15 }}</td>
+                <td>
+                  <a href="{% url 'portfolios:detail' portfolio.pk %}" class="btn btn-detail">
+                    作品管理
+                  </a>
+                  <a href="{% url 'portfolios:update' portfolio.pk %}?next={% url 'accounts:my_page' %}" class="btn btn-edit">
+                    編集
+                  </a>
+                  <a href="{% url 'portfolios:delete' portfolio.pk %}" class="btn btn-delete">
+                    削除
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>まだポートフォリオが作成されていません。</p>
+      {% endif %}
+    
+    {% elif user_type == 'teacher' %}
+      <h3>教員情報</h3>
+      <div class="info-table">
+        <table>
+          <tr>
+            <th>氏名</th>
+            <td>{{ profile.full_name }}</td>
+          </tr>
+          <tr>
+            <th>担当教科</th>
+            <td>{{ profile.subject }}</td>
+          </tr>
+          <tr>
+            <th>学校</th>
+            <td>{{ profile.school.name | default:"未設定" }}</td>
+          </tr>
+          <tr>
+            <th>ログインID</th>
+            <td>{{ profile.user.username }}</td>
+          </tr>
+        </table>
+      </div>
+
+    {% elif user_type == 'company' %}
+      <h3>担当者情報</h3>
+      <div class="info-table">
+         <table>
+          <tr>
+            <th>所属企業</th>
+            <td>{{ profile.company.name }}</td>
+          </tr>
+          <tr>
+            <th>担当者名</th>
+            <td>{{ profile.full_name }}</td>
+          </tr>
+          <tr>
+            <th>所属部署</th>
+            <td>{{ profile.department | default:"未設定" }}</td>
+          </tr>
+           <tr>
+            <th>ログインID</th>
+            <td>{{ profile.user.username }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <h4 style="margin-top: 2rem;">企業情報</h4>
+      <div class="info-table">
+         <table>
+          <tr>
+            <th>業種</th>
+            <td>{{ profile.company.industry }}</td>
+          </tr>
+          <tr>
+            <th>事業内容</th>
+            <td class="description">{{ profile.company.description | linebreaksbr }}</td>
+          </tr>
+        </table>
+      </div>
+      
+    {% endif %}
+
+    <hr>
+
+    <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user_type }}の新規登録{% endblock %}
+
+{% block content %}
+{% if user_type == '学生' %}
+  {% with user_type_class="student" %}
+    <div class="signup-container {{ user_type_class }}">
+      <h2>{{ user_type }}の新規登録</h2>
+      <form method="post" class="signup-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="signup-btn">登録する</button>
+      </form>
+    </div>
+  {% endwith %}
+
+{% elif user_type == '教員' %}
+  {% with user_type_class="teacher" %}
+    <div class="signup-container {{ user_type_class }}">
+      <h2>{{ user_type }}の新規登録</h2>
+      <form method="post" class="signup-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="signup-btn">登録する</button>
+      </form>
+    </div>
+  {% endwith %}
+
+{% elif user_type == '企業担当者' %}
+  {% with user_type_class="company" %}
+    <div class="signup-container {{ user_type_class }}">
+      <h2>{{ user_type }}の新規登録</h2>
+      <form method="post" class="signup-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="signup-btn">登録する</button>
+      </form>
+    </div>
+  {% endwith %}
+
+{% endif %}
+{% endblock %}

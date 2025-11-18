@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}新規登録タイプの選択{% endblock %}
+
+{% block content %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer) {
+      mainContainer.classList.add('signup-type-select-page');
+    }
+  });
+</script>
+
+<div class="signup-select-container">
+  <h2>新規登録</h2>
+  <p>登録するアカウントの種類を選んでください。</p>
+  
+  <ul class="signup-options">
+    <li><a href="{% url 'accounts:signup_student' %}" class="signup-link student">学生として登録</a></li>
+    <li><a href="{% url 'accounts:signup_teacher' %}" class="signup-link teacher">教員として登録</a></li>
+    <li><a href="{% url 'accounts:signup_company' %}" class="signup-link company">企業担当者として登録</a></li>
+  </ul>
+</div>
+
+{% endblock %}

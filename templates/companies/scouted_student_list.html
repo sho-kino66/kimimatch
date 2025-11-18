@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}スカウト済み学生一覧{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+  <h2>📬 {{ company_name }} - スカウト済み学生一覧</h2>
+
+  {% if scouts %}
+    <table>
+      <thead>
+        <tr>
+          <th>学生名</th>
+          <th>学校名</th>
+          <th>スカウト日</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scout in scouts %}
+          <tr>
+            <td>
+              <a href="{% url 'accounts:student_detail' scout.student.pk %}">
+                {{ scout.student.full_name }}
+              </a>
+            </td>
+            <td>{{ scout.student.school.name | default:"-" }}</td>
+            <td>{{ scout.created_at | date:"Y/m/d" }}</td>
+            <td>
+              <form action="{% url 'accounts:remove_scout' scout.student.pk %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'companies:scout_list' %}">
+                <button type="submit" class="btn-delete">取り消し</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>スカウトした学生はまだいません。</p>
+  {% endif %}
+  
+  <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}トップページ | KimiMatch{% endblock %}
+
+{% block content %}
+    <h2>トップページ</h2>
+    <p>{{ message }}</p> <div style="margin-top: 20px; padding: 10px; border: 1px solid #eee;">
+      <p>
+        すでにアカウントをお持ちの方はこちら:
+        <br>
+        <a href="{% url 'accounts:login' %}" style="font-size: 1.2em; font-weight: bold;">
+          ログイン
+        </a>
+      </p>
+      <hr>
+      <p>
+        初めてご利用の方（学生・教員・企業）はこちら:
+        <br>
+        <a href="{% url 'accounts:signup_type_select' %}" style="font-size: 1.2em; font-weight: bold;">
+          新規登録
+        </a>
+      </p>
+    </div>
+    <hr>
+    <p>（ここに企業機能紹介、学校機能紹介などへのリンクを配置）</p>
+{% endblock %}

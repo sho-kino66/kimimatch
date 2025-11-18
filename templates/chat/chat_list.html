@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}チャット一覧 (受信箱){% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+
+    <h2>チャット一覧 (受信箱)</h2>
+
+    {% if chat_rooms %}
+      <table class="chat-list-table">
+        <thead>
+          <tr>
+            <th>チャット相手</th>
+            <th>最終メッセージ日時</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for room in chat_rooms %}
+            <tr>
+              <td>
+                <a href="{% url 'chat:chat_room' room.id %}?next={{ request.path }}">
+                  
+                  {{ room.other_participant_display_name }}
+                  
+                </a>
+              </td>
+              <td>
+                {% if room.last_message_timestamp %}
+                  {{ room.last_message_timestamp|date:"Y/m/d H:i" }}
+                {% else %}
+                  ---
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>まだチャットがありません。</p>
+      <p>
+        学生詳細ページや企業詳細ページから、チャットを開始できます。
+      </p>
+    {% endif %}
+    
+    <hr>
+    <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}企業を探す{% endblock %}
+
+{% block content %}
+  <h2>企業一覧</h2>
+  
+  <form method="get" action="{% url 'companies:list' %}">
+    <input type="text" name="query" value="{{ query }}" placeholder="企業名、業種...">
+    <button type="submit">検索</button>
+  </form>
+  <hr>
+
+  {% if companies %}
+    <table border="1" cellpadding="5">
+      <thead>
+        <tr>
+          <th>
+            <a href="?sort=name&query={{ query }}">
+              企業名
+              {% if sort_by == 'name' %}▼{% endif %}
+            </a>
+          </th>
+          <th>
+            <a href="?sort=industry&query={{ query }}">
+              業種
+              {% if sort_by == 'industry' %}▼{% endif %}
+            </a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for company in companies %}
+          <tr>
+            <td>
+              <a href="{% url 'companies:detail' company.pk %}">
+                {{ company.name }}
+              </a>
+            </td>
+            <td>{{ company.industry }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    {% else %}
+    {% if query %}
+      <p>「{{ query }}」に一致する企業は見つかりませんでした。</p>
+    {% else %}
+      <p>企業はまだ登録されていません。</p>
+    {% endif %}
+  {% endif %}
+  
+  <hr>
+  <p><a href="{% url 'accounts:dashboard' %}">メインメニューに戻る</a></p>
+{% endblock %}
