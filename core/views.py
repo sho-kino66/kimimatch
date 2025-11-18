@@ -26,3 +26,12 @@ def announcement_detail(request, pk):
         'announcement': announcement,
     }
     return render(request, 'core/announcement_detail.html', context)
+
+def student_service(request):
+    return render(request, 'core/student_service.html')
+
+def company_service(request):
+    return render(request, 'core/company_service.html')
+
+def school_service(request):
+    return render(request, 'core/school_service.html')

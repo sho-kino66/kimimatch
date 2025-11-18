@@ -3,24 +3,53 @@
 {% block title %}トップページ | KimiMatch{% endblock %}
 
 {% block content %}
-    <h2>トップページ</h2>
-    <p>{{ message }}</p> <div style="margin-top: 20px; padding: 10px; border: 1px solid #eee;">
-      <p>
-        すでにアカウントをお持ちの方はこちら:
-        <br>
-        <a href="{% url 'accounts:login' %}" style="font-size: 1.2em; font-weight: bold;">
-          ログイン
-        </a>
-      </p>
-      <hr>
-      <p>
-        初めてご利用の方（学生・教員・企業）はこちら:
-        <br>
-        <a href="{% url 'accounts:signup_type_select' %}" style="font-size: 1.2em; font-weight: bold;">
-          新規登録
-        </a>
-      </p>
+<div class="top-page-container">
+
+  <div class="hero-section">
+    <h2 class="app-title">KimiMatch</h2>
+    <p class="app-subtitle">
+      専門学校生と企業をつなぐ<br>
+      新しいポートフォリオ型マッチングプラットフォーム
+    </p>
+
+    <div class="auth-box">
+      <div class="auth-item">
+        <p>すでにアカウントをお持ちの方</p>
+        <a href="{% url 'accounts:login' %}" class="btn btn-login">ログイン</a>
+      </div>
+      <div class="auth-separator"></div>
+      <div class="auth-item">
+        <p>初めてご利用の方（学生・教員・企業）</p>
+        <a href="{% url 'accounts:signup_type_select' %}" class="btn btn-signup">新規登録</a>
+      </div>
     </div>
-    <hr>
-    <p>（ここに企業機能紹介、学校機能紹介などへのリンクを配置）</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <h3 style="text-align: center; color: #555; margin-bottom: 20px;">機能紹介</h3>
+  
+  <div class="service-links">
+      
+      <a href="{% url 'core:student_service' %}" class="service-card student-service">
+          <span class="icon">🎓</span>
+          <span class="text">学生向けの機能</span>
+          <small>ポートフォリオ作成・企業検索</small>
+      </a>
+
+      <a href="{% url 'core:company_service' %}" class="service-card company-service">
+          <span class="icon">🏢</span>
+          <span class="text">企業向けの機能</span>
+          <small>スカウト・ダイレクトチャット</small>
+      </a>
+
+      <a href="{% url 'core:school_service' %}" class="service-card school-service"> 
+          <span class="icon">👨‍🏫</span>
+          <span class="text">学校向けの機能</span>
+          <small>学生管理・就職支援</small>
+      </a>
+
+  </div>
+
+</div>
 {% endblock %}

@@ -1777,3 +1777,121 @@ header {
   background-color: #f9f9f8;
   border-radius: 8px;
 }
+/* === 13. トップページ (top_page.html) === */
+
+.top-page-container {
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* タイトル周り */
+.app-title {
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 10px;
+  border-left: none !important; /* base.htmlのスタイルをリセット */
+  letter-spacing: 2px;
+}
+.app-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+  line-height: 1.8;
+}
+
+/* ログイン・登録ボックス */
+.auth-box {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.auth-item p {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+.auth-separator {
+  height: 1px;
+  background-color: #eee;
+  width: 100%;
+}
+
+/* ボタン */
+.btn-login {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff; /* 青 */
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+.btn-signup {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #f6c200; /* 黄 */
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+.btn-login:hover, .btn-signup:hover {
+  opacity: 0.8;
+  text-decoration: none;
+  color: #fff;
+}
+
+/* 区切り線 */
+.section-divider {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 50px 0;
+}
+
+/* サービス紹介カード */
+.service-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  width: 200px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+.service-card .icon { font-size: 3rem; margin-bottom: 10px; }
+.service-card .text { font-weight: bold; font-size: 1.1rem; color: #333; margin-bottom: 5px;}
+.service-card small { font-size: 0.8rem; color: #888; }
+
+/* カードごとの色 */
+.service-card.student-service:hover { border-color: #16a34a; }
+.service-card.company-service:hover { border-color: #d9a900; }
+.service-card.school-service:hover { border-color: #3b82f6; }
