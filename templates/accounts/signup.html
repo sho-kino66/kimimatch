@@ -3,41 +3,44 @@
 {% block title %}{{ user_type }}の新規登録{% endblock %}
 
 {% block content %}
-{% if user_type == '学生' %}
-  {% with user_type_class="student" %}
-    <div class="signup-container {{ user_type_class }}">
-      <h2>{{ user_type }}の新規登録</h2>
-      <form method="post" class="signup-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="signup-btn">登録する</button>
-      </form>
-    </div>
-  {% endwith %}
 
-{% elif user_type == '教員' %}
-  {% with user_type_class="teacher" %}
-    <div class="signup-container {{ user_type_class }}">
-      <h2>{{ user_type }}の新規登録</h2>
-      <form method="post" class="signup-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="signup-btn">登録する</button>
-      </form>
-    </div>
-  {% endwith %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('auth-page-mode');
+    
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer) {
+        mainContainer.classList.add('signup-page-container');
+    }
+  });
+</script>
 
-{% elif user_type == '企業担当者' %}
-  {% with user_type_class="company" %}
-    <div class="signup-container {{ user_type_class }}">
-      <h2>{{ user_type }}の新規登録</h2>
-      <form method="post" class="signup-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="signup-btn">登録する</button>
-      </form>
-    </div>
-  {% endwith %}
+<div class="signup-container {{ user_type_class }}">
+  <h2>{{ user_type_jp }} 新規登録</h2>
+  
+  <form method="post" class="signup-form">
+    {% csrf_token %}
+    
+    {% for field in form %}
+      <p>
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <span style="color: red; font-size: 0.9em;">{{ field.errors.0 }}</span>
+        {% endif %}
+        {% if field.help_text %}
+          <span style="color: #666; font-size: 0.8em; display:block;">{{ field.help_text }}</span>
+        {% endif %}
+      </p>
+    {% endfor %}
 
-{% endif %}
+    <button type="submit" class="signup-btn">登録する</button>
+  </form>
+
+  <div class="auth-footer-links">
+      <a href="{% url 'accounts:signup_type_select' %}">← タイプ選択へ戻る</a>
+      <span>|</span>
+      <a href="{% url 'core:top_page' %}">トップページへ</a>
+  </div>
+  </div>
 {% endblock %}

@@ -9,6 +9,8 @@
     if (mainContainer) {
       mainContainer.classList.add('signup-type-select-page');
     }
+    // ヘッダー・フッターを赤くする
+    document.body.classList.add('auth-page-mode');
   });
 </script>
 
@@ -21,6 +23,11 @@
     <li><a href="{% url 'accounts:signup_teacher' %}" class="signup-link teacher">教員として登録</a></li>
     <li><a href="{% url 'accounts:signup_company' %}" class="signup-link company">企業担当者として登録</a></li>
   </ul>
-</div>
 
+  <div class="auth-footer-links">
+    <a href="{% url 'accounts:login' %}">ログイン画面へ</a>
+    <span>|</span>
+    <a href="{% url 'core:top_page' %}">トップページへ</a>
+  </div>
+  </div>
 {% endblock %}

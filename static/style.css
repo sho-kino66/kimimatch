@@ -1235,14 +1235,16 @@ form button[type="submit"]:disabled {
   box-sizing: border-box;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+/* ★ フォーカス時の色を赤に変更 */
 .login-page input:focus {
   outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+  border-color: #ff4d4d; 
+  box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.2);
 }
+/* ★ ボタンの色を赤に変更 */
 .login-page button {
   margin-top: 10px;
-  background-color: #4caf50;
+  background-color: #ff4d4d; 
   color: #fff;
   border: none;
   padding: 12px 0;
@@ -1253,7 +1255,7 @@ form button[type="submit"]:disabled {
   transition: background-color 0.3s ease;
 }
 .login-page button:hover {
-  background-color: #43a047;
+  background-color: #e60000; /* ホバー時は濃い赤 */
 }
 .login-page .error {
   color: #d9534f;
@@ -1271,8 +1273,9 @@ form button[type="submit"]:disabled {
   color: #666;
   font-size: 0.9rem;
 }
+/* ★ リンクの色を赤に変更 */
 .login-note a {
-  color: #4caf50;
+  color: #ff4d4d;
   font-weight: 600;
 }
 
@@ -1448,7 +1451,7 @@ form button[type="submit"]:disabled {
 }
 .signup-link.company {
   background-color: #f6c200;
-  color: #333;
+  color: #fff;
 }
 .signup-link.company:hover {
   background-color: #d9a900;
@@ -1938,4 +1941,114 @@ body.top-page-mode footer {
   .top-page-wrapper .service-links {
       grid-template-columns: 1fr;
   }
+}
+
+/* === 14. トップページ専用ヘッダー・フッター (赤色テーマ) === */
+
+/* ★★★ ↓↓ (追加) メインコンテナの幅制限を解除 ↓↓ ★★★ */
+/* これにより、ヘッダーとフッターが画面の端まで広がります */
+body.top-page-mode .main-container {
+  max-width: none !important;
+  padding: 0 !important;
+  background-color: transparent !important; /* 背景画像が見えるように透明に */
+}
+body.top-page-mode main {
+  padding: 0 !important; /* mainタグの余白も削除 */
+}
+/* ★★★ ↑↑ 追加ここまで ↑↑ ★★★ */
+
+
+/* ヘッダー背景 (赤) */
+body.top-page-mode header {
+  background-color: #e62e2e !important;
+  border-bottom: 3px solid #cc0000 !important;
+  width: 100%;
+}
+
+/* ヘッダー文字色 (白) */
+body.top-page-mode header h1 a,
+body.top-page-mode header nav a {
+  color: #ffffff !important;
+}
+
+/* ヘッダー内のリンク（ログイン・新規登録）を消す */
+body.top-page-mode header nav a {
+  display: none !important;
+}
+
+/* ハンバーガーメニューアイコン (白) */
+body.top-page-mode .hamburger-icon span {
+  background-color: #ffffff !important;
+}
+
+/* フッター背景 (赤) */
+body.top-page-mode footer {
+  background-color: #e62e2e !important;
+  color: #ffffff !important;
+  border-top: 3px solid #cc0000 !important;
+  width: 100%;
+}
+
+/* === 15. 認証ページ共通 (ログイン・新規登録) === */
+/* body に .auth-page-mode がついている時だけ適用 */
+
+/* ★★★ ↓↓ (追加) メインコンテナの幅制限を解除 ↓↓ ★★★ */
+/* これにより、ヘッダーとフッターが画面の端まで広がります */
+body.auth-page-mode .main-container {
+  max-width: none !important;
+  padding: 0 !important;
+}
+/* ★★★ ↑↑ 追加ここまで ↑↑ ★★★ */
+
+
+/* ヘッダー背景 (赤) */
+body.auth-page-mode header {
+  background-color: #e62e2e !important;
+  border-bottom: 3px solid #cc0000 !important;
+  width: 100%; /* 念のため */
+}
+
+/* ヘッダー文字色 (白) */
+body.auth-page-mode header h1 a {
+  color: #ffffff !important;
+}
+
+/* ヘッダー内のリンク（ログイン・新規登録）を消す */
+body.auth-page-mode header nav a {
+  display: none !important;
+}
+
+/* フッター背景 (赤) */
+body.auth-page-mode footer {
+  background-color: #e62e2e !important;
+  color: #ffffff !important;
+  border-top: 3px solid #cc0000 !important;
+  width: 100%; /* 念のため */
+}
+
+/* ★★★ ↓↓ (追加) ページ下部の戻るリンク群 ↓↓ ★★★ */
+.auth-footer-links {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid #eee; /* 薄い区切り線 */
+  padding-top: 15px;
+}
+
+.auth-footer-links a {
+  display: inline-block;
+  color: #666;
+  text-decoration: none;
+  margin: 0 10px;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.auth-footer-links a:hover {
+  color: #e62e2e; /* ホバー時は赤色 */
+  text-decoration: underline;
+}
+
+.auth-footer-links span {
+  color: #ccc; /* 区切り線の色 */
 }
