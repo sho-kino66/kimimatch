@@ -13,6 +13,7 @@ from chat.models import ChatRoom # ChatRoom もインポート
 from django.db.models import Q, Count
 from portfolios.models import Portfolio
 from core.models import Announcement
+from django.core.paginator import Paginator
 
 # ==================================
 # 1. 新規登録（サインアップ）関連
@@ -115,6 +116,7 @@ def dashboard(request):
     user_type = None
     profile = None
     
+    # --- ユーザー種別とプロフィールの判定 (既存のコード) ---
     try:
         profile = user.student
         user_type = 'student'
@@ -132,14 +134,26 @@ def dashboard(request):
                 else:
                     user_type = 'unassigned' 
     
-    announcements = Announcement.objects.all().order_by('-created_at')[:5]
+    # --- ↓↓ 変更部分: ページネーションの実装 ↓↓ ---
+    
+    # 1. 全てのお知らせを取得
+    announcement_list = Announcement.objects.all().order_by('-created_at')
+    
+    # 2. Paginatorを設定 (1ページあたり5件)
+    paginator = Paginator(announcement_list, 5)
+    
+    # 3. URLのパラメータ(?page=2など)から現在のページ番号を取得
+    page_number = request.GET.get('page')
+    
+    # 4. 指定されたページのデータ（page_obj）を取得
+    page_obj = paginator.get_page(page_number)
 
     context = {
         'username': user.username,
         'user_type': user_type,
         'profile': profile,
-        # --- ↓↓ 追加部分: テンプレートに渡す ↓↓ ---
-        'announcements': announcements,
+        # テンプレートには page_obj を 'announcements' として渡します
+        'announcements': page_obj, 
     }
     return render(request, 'accounts/dashboard.html', context)
 

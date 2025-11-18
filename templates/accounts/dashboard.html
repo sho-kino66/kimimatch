@@ -12,17 +12,33 @@
         {% for item in announcements %}
           <li class="announcement-item">
             <span class="announcement-date">{{ item.created_at|date:"Y年m月d日" }}</span>
-            
             <div class="announcement-title">
               <a href="{% url 'core:announcement_detail' item.pk %}">
                 {{ item.title }}
               </a>
             </div>
-            
-            </li>
+          </li>
         {% endfor %}
       </ul>
-    {% else %}
+
+      <div class="pagination">
+        <span class="step-links">
+            {% if announcements.has_previous %}
+                <a href="?page=1" class="page-link">&laquo; 先頭</a>
+                <a href="?page={{ announcements.previous_page_number }}" class="page-link">前へ</a>
+            {% endif %}
+
+            <span class="current">
+                {{ announcements.number }} / {{ announcements.paginator.num_pages }} ページ
+            </span>
+
+            {% if announcements.has_next %}
+                <a href="?page={{ announcements.next_page_number }}" class="page-link">次へ</a>
+                <a href="?page={{ announcements.paginator.num_pages }}" class="page-link">最後 &raquo;</a>
+            {% endif %}
+        </span>
+      </div>
+      {% else %}
       <div class="no-announcement">
         <p>現在、新しいお知らせはありません。</p>
       </div>
