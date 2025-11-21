@@ -2105,3 +2105,76 @@ body.auth-page-mode footer {
     border-color: #bfdbfe;
     background-color: #eff6ff; /* ほんのり青の背景 */
 }
+
+/* === ボタンの位置とサイズを強制的に揃える設定 === */
+
+/* 1. ボタンが入っている箱 */
+.role-student .action-box {
+  display: flex;           /* 横並び */
+  justify-content: center; /* 左右中央寄せ */
+  align-items: center;     /* 上下中央揃え */
+  gap: 20px;               /* ボタン間の隙間 */
+  padding: 20px 0;         /* 上下の余白 */
+  width: 100%;             /* 横幅いっぱい */
+}
+
+/* 2. フォームタグの余白を完全に消す */
+.role-student .action-box form {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;           /* フォーム自体もFlexボックスにする */
+  align-items: center;     /* 内部のボタンを上下中央に */
+  height: auto;            /* 高さを自動調整 */
+}
+
+/* 3. ボタン(button)とリンク(a)のスタイルを完全統一 */
+.role-student .action-box .btn-favorite,
+.role-student .action-box .btn-cancel,
+.role-student .action-box .btn-chat {
+  display: flex;           /* Flexboxで文字をど真ん中に */
+  justify-content: center; /* 左右中央 */
+  align-items: center;     /* 上下中央 */
+  
+  width: 220px;            /* ★幅を固定して揃える */
+  height: 56px;            /* ★高さを固定して揃える */
+  
+  margin: 0 !important;    /* 余計なマージンを削除 */
+  padding: 0;              /* パディングもリセット（Flexで中央寄せするため） */
+  
+  font-size: 1rem;         /* 文字サイズ */
+  font-weight: bold;       /* 太字 */
+  border-radius: 8px;      /* 角丸 */
+  border: none;            /* 枠線なし */
+  text-decoration: none;   /* 下線なし */
+  box-sizing: border-box;  /* サイズ計算を統一 */
+  line-height: 1;          /* 行間の影響を排除 */
+  cursor: pointer;
+}
+
+/* 色の設定（お気に入り） */
+.role-student .action-box .btn-favorite {
+  background-color: #f6c200;
+  color: #333;
+}
+
+/* 色の設定（削除） */
+.role-student .action-box .btn-cancel {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 2px solid #fca5a5; /* 削除ボタンだけ枠線あり */
+}
+
+/* 色の設定（チャット） */
+.role-student .action-box .btn-chat {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+/* ホバー時の動き（共通） */
+.role-student .action-box .btn-favorite:hover,
+.role-student .action-box .btn-cancel:hover,
+.role-student .action-box .btn-chat:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
