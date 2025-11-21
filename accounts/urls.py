@@ -28,4 +28,6 @@ urlpatterns = [
     # <int:pk> は「コメントを編集したい学生(Student)のID」
     path('student/<int:pk>/comment/', views.StudentCommentUpdateView.as_view(), name='student_comment_update'),
     path('profile/edit/', views.StudentProfileUpdateView.as_view(), name='profile_update'),
+    path('profile/tags/student/', views.StudentTagUpdateView.as_view(), name='student_tag_update'),
+    path('profile/tags/company/', views.CompanyTagUpdateView.as_view(), name='company_tag_update'),
 ]

@@ -6,6 +6,101 @@ from .models import Student, Teacher, CompanyRepresentative
 from companies.models import Company # 企業を選択するためにインポート
 from schools.models import School   # 学校を選択するためにインポート
 from django.db import transaction
+from core.models import Tag
+from .models import Student
+from companies.models import CompanyTag
+
+#学生用タグ設定フォーム
+class StudentTagUpdateForm(forms.Form):
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        
+        # ★★★ 修正: カテゴリごとにリストを分ける ★★★
+        # 「強み」には、categoryが 'strength' または 'both' のものを表示
+        self.strength_tags = Tag.objects.filter(category__in=['strength', 'both'])
+        # 「条件」には、categoryが 'condition' または 'both' のものを表示
+        self.condition_tags = Tag.objects.filter(category__in=['condition', 'both'])
+        
+        # 1. 自分の強み (1位〜5位)
+        for i in range(1, 6):
+            self.fields[f'strength_{i}'] = forms.ModelChoiceField(
+                queryset=self.strength_tags,
+                label=f'自分の強み {i}位',
+                required=False,
+                widget=forms.Select(attrs={'class': 'form-control'})
+            )
+        # 2. 会社に求めるもの (1位〜5位)
+        for i in range(1, 6):
+            self.fields[f'desire_{i}'] = forms.ModelChoiceField(
+                queryset=self.condition_tags,
+                label=f'会社に求めるもの {i}位',
+                required=False,
+                widget=forms.Select(attrs={'class': 'form-control'})
+            )
+
+    def save(self):
+        student = self.user.student
+        # 既存のタグを一度クリア
+        StudentTag.objects.filter(student=student).delete()
+        
+        # フォームの入力値を保存
+        for key, value in self.cleaned_data.items():
+            if value:
+                tag_type, rank_str = key.split('_')
+                rank = int(rank_str)
+                
+                StudentTag.objects.create(
+                    student=student,
+                    tag=value,
+                    tag_type=tag_type,
+                    rank=rank
+                )
+
+# 企業用タグ設定フォーム
+class CompanyTagUpdateForm(forms.Form):
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        
+        # ★★★ 修正: カテゴリごとにリストを分ける ★★★
+        # 「強み」には、categoryが 'strength' または 'both' のものを表示
+        self.strength_tags = Tag.objects.filter(category__in=['strength', 'both'])
+        # 「条件」には、categoryが 'condition' または 'both' のものを表示
+        self.condition_tags = Tag.objects.filter(category__in=['condition', 'both'])
+        
+        # 1. 求める人材の強み (1位〜5位)
+        for i in range(1, 6):
+            self.fields[f'strength_{i}'] = forms.ModelChoiceField(
+                queryset=self.strength_tags,
+                label=f'求める人材の強み {i}位',
+                required=False,
+                widget=forms.Select(attrs={'class': 'form-control'})
+            )
+        # 2. 自社の特徴・政策 (1位〜5位)
+        for i in range(1, 6):
+            self.fields[f'feature_{i}'] = forms.ModelChoiceField(
+                queryset=self.condition_tags,
+                label=f'自社の特徴・政策 {i}位',
+                required=False,
+                widget=forms.Select(attrs={'class': 'form-control'})
+            )
+
+    def save(self):
+        company = self.user.companyrepresentative.company
+        CompanyTag.objects.filter(company=company).delete()
+        
+        for key, value in self.cleaned_data.items():
+            if value:
+                tag_type, rank_str = key.split('_')
+                rank = int(rank_str)
+                
+                CompanyTag.objects.create(
+                    company=company,
+                    tag=value,
+                    tag_type=tag_type,
+                    rank=rank
+                )
 
 # Django標準のUserCreationFormを拡張して、学生プロフィールも同時作成する
 class StudentSignUpForm(UserCreationForm):

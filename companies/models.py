@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from core.models import Tag
 
 class Company(models.Model):
     name = models.CharField(max_length=100, verbose_name="企業名")
@@ -26,3 +27,18 @@ class Scout(models.Model):
 
     def __str__(self):
         return f"{self.company.name}が{self.student.full_name}をスカウト"
+    
+# 企業のタグ設定（中間テーブル）
+class CompanyTag(models.Model):
+    TAG_TYPE_CHOICES = (
+        ('strength', '求める人材の強み'),
+        ('feature', '自社の特徴・政策'),
+    )
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='tags')
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag_type = models.CharField(max_length=10, choices=TAG_TYPE_CHOICES)
+    rank = models.IntegerField(verbose_name="順位", choices=[(i, f"{i}位") for i in range(1, 6)])
+
+    class Meta:
+        unique_together = ('company', 'tag_type', 'rank')
+        ordering = ['tag_type', 'rank']    

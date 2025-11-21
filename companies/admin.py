@@ -1,8 +1,16 @@
 from django.contrib import admin
-from .models import Company, Scout
+from .models import Company, Scout,CompanyTag #CompanyTag追加
 
-# 企業情報の登録
-admin.site.register(Company)
+# 1. タグのインライン設定
+class CompanyTagInline(admin.TabularInline):
+    model = CompanyTag
+    extra = 1
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'industry')
+    # ★ この行がないと画面に表示されません！
+    inlines = [CompanyTagInline]
 
 @admin.register(Scout)
 class ScoutAdmin(admin.ModelAdmin):

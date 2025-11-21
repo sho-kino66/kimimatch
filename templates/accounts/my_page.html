@@ -36,6 +36,9 @@
         <a href="{% url 'accounts:profile_update' %}" class="btn btn-edit">
           プロフィールを編集
         </a>
+        <a href="{% url 'accounts:student_tag_update' %}" class="btn btn-detail" style="margin-left: 10px;">
+           マッチングタグ設定
+        </a>
       </div>
 
       {% if profile.comment %}
@@ -149,6 +152,12 @@
             <td class="description">{{ profile.company.description | linebreaksbr }}</td>
           </tr>
         </table>
+      </div>
+      
+      <div style="text-align: right; margin-top: 10px;">
+        <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-detail" style="background-color: #f6c200; color: #333;">
+           マッチングタグ設定
+        </a>
       </div>
       
     {% endif %}

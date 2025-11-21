@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}マッチング用タグ設定{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+    <h2>マッチング用タグ設定（学生）</h2>
+    
+    <form method="post">
+      {% csrf_token %}
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        
+        <div class="tag-box strength-box" style="flex: 1; min-width: 300px;">
+          <h3 style="color: #16a34a; border-bottom: 2px solid #16a34a; margin-top: 0;">あなたの強み</h3>
+          {% for field in form %}
+            {% if "strength" in field.name %}
+              <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">{{ field.label }}</label>
+                {{ field }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="tag-box condition-box" style="flex: 1; min-width: 300px;">
+          <h3 style="color: #1e3a8a; border-bottom: 2px solid #1e3a8a; margin-top: 0;">会社に求めるもの</h3>
+          {% for field in form %}
+            {% if "desire" in field.name %}
+              <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">{{ field.label }}</label>
+                {{ field }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <hr>
+      <button type="submit" class="btn btn-create">設定を保存する</button>
+    </form>
+    
+    <a href="{% url 'accounts:my_page' %}" class="back-link">← マイページに戻る</a>
+  </div>
+</div>
+{% endblock %}

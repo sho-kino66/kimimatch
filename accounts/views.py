@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, DetailView, UpdateView
+from django.views.generic import CreateView, ListView, DetailView, UpdateView,FormView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Student, Teacher, CompanyRepresentative, FavoriteCompany
 from .forms import (StudentSignUpForm, TeacherSignUpForm, CompanyRepresentativeSignUpForm,
                     TeacherCommentForm,
-                    StudentProfileUpdateForm )
+                    StudentProfileUpdateForm,StudentTagUpdateForm,CompanyTagUpdateForm )
 from django.shortcuts import render, redirect, get_object_or_404
 from companies.models import Company, Scout
 from chat.models import ChatRoom # ChatRoom もインポート
@@ -14,7 +14,7 @@ from django.db.models import Q, Count
 from portfolios.models import Portfolio
 from core.models import Announcement
 from django.core.paginator import Paginator
-
+from core.utils import calculate_match_percentage
 # ==================================
 # 1. 新規登録（サインアップ）関連
 # ==================================
@@ -384,3 +384,51 @@ class StudentProfileUpdateView(LoginRequiredMixin, StudentOnlyMixin, UpdateView)
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'プロフィール編集'
         return context
+    
+# 学生タグ設定ビュー
+class StudentTagUpdateView(LoginRequiredMixin, StudentOnlyMixin, FormView):
+    template_name = 'accounts/student_tag_form.html'
+    form_class = StudentTagUpdateForm
+    success_url = reverse_lazy('accounts:my_page')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_initial(self):
+        initial = {}
+        student = self.request.user.student
+        # 保存済みのタグをフォームの初期値にセット
+        for st_tag in student.tags.all():
+            key = f"{st_tag.tag_type}_{st_tag.rank}"
+            initial[key] = st_tag.tag
+        return initial
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+# 企業タグ設定ビュー
+class CompanyTagUpdateView(LoginRequiredMixin, CompanyOnlyMixin, FormView):
+    template_name = 'accounts/company_tag_form.html'
+    form_class = CompanyTagUpdateForm
+    success_url = reverse_lazy('accounts:my_page')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_initial(self):
+        initial = {}
+        # 企業担当者に紐付く企業を取得
+        company = self.request.user.companyrepresentative.company
+        for co_tag in company.tags.all():
+            key = f"{co_tag.tag_type}_{co_tag.rank}"
+            initial[key] = co_tag.tag
+        return initial
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)    

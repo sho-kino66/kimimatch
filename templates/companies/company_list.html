@@ -6,7 +6,7 @@
   <h2>企業一覧</h2>
   
   <form method="get" action="{% url 'companies:list' %}">
-    <input type="text" name="query" value="{{ query }}" placeholder="企業名、業種...">
+    <input type="text" name="query" value="{{ query }}" placeholder="企業名、業種、タグ...">
     <button type="submit">検索</button>
   </form>
   <hr>

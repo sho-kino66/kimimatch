@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}マッチング用タグ設定{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card" style="border-top: 5px solid #f6c200;">
+    <h2>マッチング用タグ設定（企業）</h2>
+    
+    <form method="post">
+      {% csrf_token %}
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        
+        <div class="tag-box" style="flex: 1; min-width: 300px; border-color: #fde68a; background-color: #fffbeb;">
+          <h3 style="color: #856a00; border-bottom: 2px solid #856a00; margin-top: 0;">求める人材の強み</h3>
+          {% for field in form %}
+            {% if "strength" in field.name %}
+              <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">{{ field.label }}</label>
+                {{ field }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="tag-box" style="flex: 1; min-width: 300px; border-color: #fde68a; background-color: #fffbeb;">
+          <h3 style="color: #856a00; border-bottom: 2px solid #856a00; margin-top: 0;">自社の特徴・政策</h3>
+          {% for field in form %}
+            {% if "feature" in field.name %}
+              <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">{{ field.label }}</label>
+                {{ field }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <hr>
+      <button type="submit" class="btn" style="background-color: #f6c200; color: #333; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">設定を保存する</button>
+    </form>
+    
+    <a href="{% url 'accounts:my_page' %}" class="back-link">← マイページに戻る</a>
+  </div>
+</div>
+{% endblock %}

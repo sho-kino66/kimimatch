@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 # from schools.models import School # (循環インポート回避のため文字列指定)
+from core.models import Tag
 
 # 学生プロフィール
 class Student(models.Model):
@@ -75,3 +76,18 @@ class FavoriteCompany(models.Model):
 
     def __str__(self):
         return f"{self.student.full_name}のお気に入り ({self.company.name})"
+    
+# 学生のタグ設定（中間テーブル）
+class StudentTag(models.Model):
+    TAG_TYPE_CHOICES = (
+        ('strength', '自分の強み'),
+        ('desire', '会社に求めるもの'),
+    )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='tags')
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag_type = models.CharField(max_length=10, choices=TAG_TYPE_CHOICES)
+    rank = models.IntegerField(verbose_name="順位", choices=[(i, f"{i}位") for i in range(1, 6)])
+
+    class Meta:
+        unique_together = ('student', 'tag_type', 'rank') # 同一タイプ内で順位は重複しない
+        ordering = ['tag_type', 'rank']    

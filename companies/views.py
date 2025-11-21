@@ -8,14 +8,16 @@ from accounts.models import FavoriteCompany, Student
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User # 1. User をインポート
 from chat.models import ChatRoom           # 2. ChatRoom をインポート
-from django.db.models import Count,Q        # 3. Count をインポート
+from django.db.models import Count,Q   
+     # 3. Count をインポート
+from core.utils import calculate_match_percentage     
 
 # 1. 企業一覧ビュー
 class CompanyListView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, ListView):
     model = Company
     template_name = 'companies/company_list.html' # 使うテンプレート
     context_object_name = 'companies' # テンプレート内で使う変数名
-    paginate_by = 10 # ページネーション
+    paginate_by = 10 
 
     def get_queryset(self):
         queryset = Company.objects.all()
@@ -26,7 +28,9 @@ class CompanyListView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, ListView):
             queryset = queryset.filter(
                 Q(name__icontains=query) |
                 Q(industry__icontains=query) |
-                Q(description__icontains=query)
+                Q(description__icontains=query)|
+                #タグ名での検索追加
+                Q(tags__tag__name__icontains=query)
             )
         
         # 2. ソート (Sort)
@@ -44,7 +48,6 @@ class CompanyListView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('query', '')
-        
         context['sort_by'] = self.request.GET.get('sort', 'name')
         return context
 
@@ -66,6 +69,10 @@ class CompanyDetailView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, DetailVie
         # --- ログインユーザーが「学生」の場合 ---
         if hasattr(user, 'student'):
             student = user.student
+
+            #マッチ度の計算と追加 
+            match_rate = calculate_match_percentage(student, company)
+            context['match_rate'] = match_rate
             
             # (A) お気に入り状態をチェック
             is_favorited = FavoriteCompany.objects.filter(student=student, company=company).exists()

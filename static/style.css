@@ -2082,3 +2082,26 @@ body.auth-page-mode footer {
   font-weight: 600;
   color: #555;
 }
+
+/* タグ設定エリアを囲む枠線のデザイン */
+.tag-box {
+    border: 2px solid #e2e8f0; /* 少し太めのグレーの枠線 */
+    border-radius: 12px;       /* 角を丸くする */
+    padding: 20px;             /* 内側に余白を入れる */
+    background-color: #ffffff; /* 背景は白 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* うっすら影をつけて浮かせる */
+    height: 100%;              /* 高さを揃える */
+    box-sizing: border-box;    /* 余白を含めたサイズ計算 */
+}
+
+/* 強み側の枠線の色（緑っぽく） */
+.tag-box.strength-box {
+    border-color: #bbf7d0; 
+    background-color: #f0fdf4; /* ほんのり緑の背景 */
+}
+
+/* 条件側の枠線の色（青/黄っぽく） */
+.tag-box.condition-box {
+    border-color: #bfdbfe;
+    background-color: #eff6ff; /* ほんのり青の背景 */
+}
