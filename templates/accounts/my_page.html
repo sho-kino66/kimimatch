@@ -169,7 +169,8 @@
         </a>
       </div>
 
-    {% elif user_type == 'company' %}
+{% elif user_type == 'company' %}
+      
       <h3>担当者情報</h3>
       <div class="info-table">
          <table>
@@ -192,12 +193,6 @@
         </table>
       </div>
 
-      <div style="text-align: right; margin-top: 10px;">
-        <a href="{% url 'accounts:profile_update' %}" class="btn btn-edit">
-          担当者プロフィールを編集
-        </a>
-      </div>
-
       <h4 style="margin-top: 2rem;">企業情報</h4>
       <div class="info-table">
          <table>
@@ -211,11 +206,17 @@
           </tr>
         </table>
       </div>
-      
-      <div style="text-align: right; margin-top: 10px;">
-        <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-detail" style="background-color: #f6c200; color: #333;">
+
+      <div style="text-align: right; margin-top: 15px;">
+        
+        <a href="#" class="btn btn-edit">
+          担当者プロフィールを編集
+        </a>
+
+        <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-edit"style="margin-left: 10px; color: #d9a900; border: none;">
            マッチングタグ設定
         </a>
+
       </div>
       
     {% endif %}

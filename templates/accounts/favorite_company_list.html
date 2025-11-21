@@ -3,42 +3,50 @@
 
 {% block content %}
 <div class="page-container">
-  <h2> お気に入り企業一覧</h2>
+  <div class="profile-card">
+    <h2>お気に入り企業一覧</h2>
 
-  {% if favorites %}
-    <table class="favorite-table">
-      <thead>
-        <tr>
-          <th>企業名</th>
-          <th>業種</th>
-          <th>お気に入り登録日</th>
-          <th>（操作）</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% if favorites %}
+      <div class="favorite-list-container">
         {% for fav in favorites %}
-          <tr>
-            <td>
-              <a href="{% url 'companies:detail' fav.company.pk %}?next={% url 'accounts:favorite_list' %}">
-                {{ fav.company.name }}
+          
+          <div class="company-card-item">
+            
+            <div class="company-info">
+              <h3>{{ fav.company.name }}</h3>
+              <div class="company-meta">
+                <span class="industry-label">業種:</span> {{ fav.company.industry }}
+                <span style="margin: 0 10px; color: #ccc;">|</span>
+                <span class="date-label">登録日:</span> {{ fav.created_at | date:"Y/m/d" }}
+              </div>
+            </div>
+
+            <div class="action-box-small">
+              
+              <a href="{% url 'companies:detail' fav.company.pk %}?next={% url 'accounts:favorite_list' %}" class="btn-detail-gray">
+                詳細を見る
               </a>
-            </td>
-            <td>{{ fav.company.industry }}</td>
-            <td>{{ fav.created_at | date:"Y/m/d" }}</td>
-            <td>
-              <form action="{% url 'companies:remove_favorite' fav.company.pk %}" method="post" style="margin: 0;">
+
+              <form action="{% url 'companies:remove_favorite' fav.company.pk %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn-delete">削除</button>
+                <button type="submit" class="btn-cancel">削除</button>
               </form>
-            </td>
-          </tr>
+
+            </div>
+
+          </div>
+          <hr class="card-divider">
         {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>お気に入りに登録された企業はまだありません。</p>
-  {% endif %}
-  
-  <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+      </div>
+
+    {% else %}
+      <p>お気に入りに登録された企業はまだありません。</p>
+    {% endif %}
+    
+    <div style="margin-top: 30px;">
+      <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+    </div>
+
+  </div>
 </div>
 {% endblock %}
