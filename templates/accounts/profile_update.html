@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}プロフィール編集{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="profile-card">
+    
+    <h2>{{ user_type_jp|default:"プロフィール" }} 編集</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      {{ form.as_p }}
+      
+      <button type="submit" class="btn" style="background-color: #007bff; color: white;">
+        更新する
+      </button>
+    </form>
+
+    <hr>
+    <a href="{% url 'accounts:my_page' %}" class="back-link">← マイページに戻る</a>
+
+  </div>
+</div>
+{% endblock %}

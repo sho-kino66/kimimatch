@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Student
-from .models import Student, Teacher, CompanyRepresentative
+from .models import Student, Teacher, CompanyRepresentative, FavoriteCompany
 from companies.models import Company # 企業を選択するためにインポート
 from schools.models import School   # 学校を選択するためにインポート
 from django.db import transaction
@@ -202,32 +202,36 @@ class TeacherCommentForm(forms.ModelForm):
             'comment': forms.Textarea(attrs={'rows': 5}), # 入力欄を広げる
         }
 
-class StudentProfileUpdateForm(forms.ModelForm):
-    # 学校の選択肢を必須にする
-    school = forms.ModelChoiceField(
-        queryset=School.objects.all(),
-        label="所属学校",
-        required=True
-    )
-
+# 学生プロフィール編集フォーム
+class StudentProfileForm(forms.ModelForm):
     class Meta:
         model = Student
-        # 編集させたいフィールドを指定
-        fields = [
-            'full_name', 
-            'grade', 
-            'school', 
-            'is_public_to_companies'
-        ]
+        # 編集を許可するフィールド
+        fields = ['full_name', 'grade', 'school', 'is_public_to_companies']
         labels = {
             'full_name': '氏名',
             'grade': '学年',
-            'is_public_to_companies': '企業にプロフィールを公開する'
+            'school': '所属学校',
+            'is_public_to_companies': '企業へのプロフィール公開',
         }
-        help_texts = {
-            'is_public_to_companies': 'チェックを外すと、企業側の学生検索一覧に表示されなくなります。'
+
+# 教員プロフィール編集フォーム
+class TeacherProfileForm(forms.ModelForm):
+    class Meta:
+        model = Teacher
+        fields = ['full_name', 'subject', 'school']
+        labels = {
+            'full_name': '氏名',
+            'subject': '担当教科',
+            'school': '所属学校',
         }
-        widgets = {
-            # チェックボックスを大きく見やすくする (オプション)
-            'is_public_to_companies': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+
+# 企業担当者プロフィール編集フォーム
+class CompanyRepresentativeProfileForm(forms.ModelForm):
+    class Meta:
+        model = CompanyRepresentative
+        fields = ['full_name', 'department']
+        labels = {
+            'full_name': '担当者氏名',
+            'department': '所属部署',
         }
