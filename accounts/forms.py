@@ -1,13 +1,11 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Student
-from .models import Student, Teacher, CompanyRepresentative, FavoriteCompany
 from companies.models import Company # 企業を選択するためにインポート
 from schools.models import School   # 学校を選択するためにインポート
 from django.db import transaction
 from core.models import Tag
-from .models import Student
+from .models import Student, Teacher, CompanyRepresentative, FavoriteCompany, StudentTag
 from companies.models import CompanyTag
 
 #学生用タグ設定フォーム
