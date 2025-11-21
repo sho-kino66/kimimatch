@@ -218,6 +218,13 @@ class StudentDetailView(LoginRequiredMixin, TeacherOrCompanyOnlyMixin, DetailVie
         if hasattr(user, 'companyrepresentative'):
             company = user.companyrepresentative.company
             
+            # マッチ度とタグ情報の計算
+            match_data = calculate_match_percentage(student, company)
+            
+            context['match_rate'] = match_data['percentage']
+            context['matched_strengths'] = match_data['matched_strengths']   # マッチした強み
+            context['matched_conditions'] = match_data['matched_conditions'] # マッチした条件
+
             is_scouted = Scout.objects.filter(company=company, student=student).exists()
             context['is_scouted'] = is_scouted
             

@@ -15,6 +15,43 @@
 
     <h2>{{ student.full_name }} さんの詳細</h2>
     
+    {% if user.companyrepresentative and match_rate is not None %}
+      <div style="margin-bottom: 20px; padding: 15px; background-color: #fff5f5; border: 2px solid #ff6b6b; border-radius: 10px; color: #c0392b; text-align: center;">
+        <span style="font-size: 1.1rem;">貴社とのマッチ度</span><br>
+        <span style="font-size: 2.5rem; font-weight: bold; line-height: 1.2;">{{ match_rate }}%</span>
+        
+        {% if matched_strengths or matched_conditions %}
+          <hr style="border-top: 1px dashed #ffcccc; margin: 15px 0;">
+          <div style="text-align: left; font-size: 0.95rem;">
+            
+            {% if matched_strengths %}
+              <div style="margin-bottom: 8px;">
+                <strong style="color: #e53e3e;">⚡ マッチしたスキル・強み:</strong><br>
+                {% for tag in matched_strengths %}
+                  <span style="display: inline-block; background: #fff; border: 1px solid #fc8181; color: #c53030; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
+                    {{ tag }}
+                  </span>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% if matched_conditions %}
+              <div>
+                <strong style="color: #3182ce;">🤝 マッチした条件・待遇:</strong><br>
+                {% for tag in matched_conditions %}
+                  <span style="display: inline-block; background: #fff; border: 1px solid #63b3ed; color: #2b6cb0; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
+                    {{ tag }}
+                  </span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+
     {% if user.companyrepresentative %} 
       <div class="action-box">
         
