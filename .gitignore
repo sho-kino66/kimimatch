@@ -1,4 +1,19 @@
-venv/
-.venv/
-db.sqlite3
+# Python コンパイルファイル
 __pycache__/
+*.py[cod]
+*$py.class
+
+# データベース (SQLite)
+db.sqlite3
+
+# 環境設定ファイル (誤ってアップロードしないように)
+.env
+venv/
+env/
+
+# OSごとの不要ファイル
+.DS_Store
+Thumbs.db
+
+# メディアファイル (ユーザーがアップロードした画像など)
+media/
