@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}学校お申し込みフォーム{% endblock %}
+{% block content %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('top-page-mode', 'school-application-page');
+    });
+</script>
+<div class="container school-app-box">
+    <h2 class="app-form-title">学校申し込みフォーム</h2>
+    <form method="POST">
+        {% csrf_token %} 
+        {{ form.as_p }}
+        <button type="submit">申し込む</button>
+    </form>
+    <hr style="margin-top: 30px;">
+    <a href="{% url 'core:school_service' %}" class="back-link">← 機能紹介に戻る</a>
+</div>
+{% endblock %}

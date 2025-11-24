@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}お申し込み完了{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="profile-card" style="text-align: center; padding: 40px;">
+        <h2>✅ お申し込みを受け付けました</h2>
+        <p>担当者より折り返しご連絡いたします。</p>
+        <a href="{% url 'core:top_page' %}" class="btn" style="background-color: #007bff; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">トップページに戻る</a>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('top-page-mode');
+    });
+</script>
+{% endblock %}

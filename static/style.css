@@ -2178,3 +2178,68 @@ body.auth-page-mode footer {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+/* === 17. 申し込みフォーム (school/company) === */
+
+/* 共通のページ設定（縦並び・ヘッダー固定） */
+body.school-application-page,
+body.company-application-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Hiragino Sans", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+body.school-application-page { background: linear-gradient(to bottom right, #e3f2fd, #bbdefb) !important; }
+body.company-application-page { background: linear-gradient(to bottom right, #fffde7, #fff9c4) !important; }
+
+/* メインコンテンツ（中央寄せ） */
+body.school-application-page main,
+body.company-application-page main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0 !important;
+}
+/* コンテナの制限解除 */
+body.school-application-page .main-container,
+body.company-application-page .main-container {
+    max-width: none !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* フォームボックス (共通) */
+.school-app-box, .company-app-box {
+    background: #ffffffcc;
+    padding: 35px 45px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
+}
+
+/* タイトル色 */
+.school-app-box h2 { color: #1976d2; border-left: none !important; text-align: center; margin-bottom: 25px; font-size: 1.8em; }
+.company-app-box h2 { color: #f4b400; border-left: none !important; text-align: center; margin-bottom: 25px; font-size: 1.8em; }
+
+/* インプット周り */
+.school-app-box form p, .company-app-box form p { margin: 0; }
+.school-app-box label, .company-app-box label { font-weight: bold; color: #555; font-size: 14px; display: block; margin-top: 10px; }
+.school-app-box input, .company-app-box input {
+    width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px;
+    border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box;
+}
+
+/* フォーカス時・ボタン色 */
+.school-app-box input:focus { border-color: #1976d2; box-shadow: 0 0 6px rgba(25,118,210,0.3); outline: none; }
+.school-app-box button { background-color: #1976d2; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+.school-app-box button:hover { background-color: #2196f3; }
+
+.company-app-box input:focus { border-color: #f4b400; box-shadow: 0 0 6px rgba(244,180,0,0.3); outline: none; }
+.company-app-box button { background-color: #f4b400; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+.company-app-box button:hover { background-color: #fbc02d; }

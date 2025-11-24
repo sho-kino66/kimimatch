@@ -164,3 +164,7 @@ MEDIA_URL = '/media/'
 
 # ユーザーがアップロードしたファイルを保存する、サーバー上の実際のフォルダパス
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# メール設定（開発用：コンソールに出力する）
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
