@@ -96,50 +96,150 @@
 
       <hr>
 
-      <h3>コード採点</h3>
-
-      <input type="file" id="pdf-input" accept="application/pdf">
-
-      <button id="grade-btn" class="btn btn-detail" style="margin-top: 10px;">
-        PDF を採点する
-      </button>
-
-      <div id="result" style="white-space: pre-wrap; margin-top: 20px;"></div>
-
-      <script>
-        document.getElementById("grade-btn").addEventListener("click", async () => {
-            const pdfFile = document.getElementById("pdf-input").files[0];
-
-            if (!pdfFile) {
-                alert("PDFを選択してください");
+      <!-- ======================= -->
+    <!-- ✅ ここからコード採点 -->
+    <!-- ======================= -->
+ 
+    <h3>コード採点</h3>
+ 
+    <style>
+      #loading-spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 3px solid #ccc;
+        border-top: 3px solid #333;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-left: 8px;
+      }
+ 
+      @keyframes spin {
+        100% { transform: rotate(360deg); }
+      }
+ 
+      .score-box {
+        background: #f7f7ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      }
+ 
+      .score-box h4 {
+        margin-bottom: 10px;
+      }
+ 
+      .preview-box {
+        margin-top: 10px;
+        background: #111;
+        color: #0f0;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        max-height: 300px;
+        overflow: auto;
+      }
+    </style>
+ 
+    <!-- スピナー -->
+    <div id="loading-spinner"></div>
+ 
+    <!-- PDF または ZIP -->
+    <input type="file" id="file-input" accept=".pdf,.zip">
+ 
+    <!-- 採点ボタン -->
+    <button id="grade-btn" class="btn btn-detail" style="margin-top: 10px;">
+      ファイルを採点する
+    </button>
+ 
+    <!-- 結果表示 -->
+    <div id="result"></div>
+ 
+    <script>
+    document.getElementById("grade-btn").addEventListener("click", async () => {
+        const file = document.getElementById("file-input").files[0];
+        const spinner = document.getElementById("loading-spinner");
+        const resultDiv = document.getElementById("result");
+ 
+        if (!file) {
+            alert("PDF または ZIP を選択してください");
+            return;
+        }
+ 
+        spinner.style.display = "inline-block";
+        resultDiv.innerHTML = "";
+ 
+        const formData = new FormData();
+        formData.append("upload", file);
+ 
+        const apiUrl = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/";
+ 
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                body: formData
+            });
+ 
+            const data = await response.json();
+            console.log("サーバーJSON:", data);
+ 
+            if (data.error) {
+                resultDiv.innerText = "エラー: " + data.error;
                 return;
             }
-
-            const formData = new FormData();
-            formData.append("pdf_file", pdfFile);
-
-            // ローカル API
-            const apiUrl = "http://localhost:8001/grade_pdf/";
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    body: formData
+ 
+            // ✅ ZIP の場合（複数ファイル）
+            if (data.files) {
+                data.files.forEach(f => {
+                    const r = f.result;
+ 
+                    resultDiv.innerHTML += `
+                    <div class="score-box">
+                      <h4>📄 ${f.filename}</h4>
+                      正確性: ${r.正確性} / 25<br>
+                      可読性: ${r.可読性} / 25<br>
+                      パフォーマンス: ${r["パフォーマンス"]} / 25<br>
+                      スタイル: ${r.スタイル} / 25<br>
+                      <b>総合: ${r.総合} / 100</b><br><br>
+                      📝 コメント:<br>${r.コメント}
+                      <div class="preview-box">${f.preview}</div>
+                    </div>
+                    `;
                 });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    document.getElementById("result").innerText = "エラー: " + data.error;
-                } else {
-                    document.getElementById("result").innerText =
-                        "【採点結果】\n" + data.result + "\n\n【抽出プレビュー】\n" + data.preview;
-                }
-            } catch (err) {
-                document.getElementById("result").innerText = "通信エラー: " + err;
+ 
+            // ✅ PDF 単体
+            } else {
+                const r = data.result;
+ 
+                resultDiv.innerHTML = `
+                <div class="score-box">
+                  <h4>📄 ${data.filename}</h4>
+                  正確性: ${r.正確性} / 25<br>
+                  可読性: ${r.可読性} / 25<br>
+                  パフォーマンス: ${r["パフォーマンス"]} / 25<br>
+                  スタイル: ${r.スタイル} / 25<br>
+                  <b>総合: ${r.総合} / 100</b><br><br>
+                  📝 コメント:<br>${r.コメント}
+                  <div class="preview-box">${data.preview}</div>
+                </div>
+                `;
             }
-        });
-      </script>
+ 
+        } catch (err) {
+            resultDiv.innerText = "通信エラー: " + err;
+        } finally {
+            spinner.style.display = "none";
+        }
+    });
+    </script>
+ 
+    <!-- ======================= -->
+    <!-- ✅ 採点ここまで -->
+    <!-- ======================= -->
+
+
       {% elif user_type == 'teacher' %}
       <h3>教員情報</h3>
       <div class="info-table">
