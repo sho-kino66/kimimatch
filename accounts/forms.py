@@ -86,9 +86,14 @@ class CompanyTagUpdateForm(forms.Form):
 # ---------------------------------------------------------
 class StudentSignUpForm(UserCreationForm):
     full_name = forms.CharField(max_length=100, label="氏名")
-    grade = forms.IntegerField(label="学年")
     
-    # ★ 変更: プルダウンではなく「学校コード」入力欄にする
+    # ★ 変更: IntegerField から ChoiceField に変更し、モデルの選択肢を読み込む
+    grade = forms.ChoiceField(
+        choices=Student.GRADE_CHOICES, 
+        label="学年",
+        widget=forms.Select(attrs={'class': 'form-select'}) # Bootstrap用のクラス
+    )
+    
     school_code = forms.CharField(
         max_length=8, 
         label="学校コード", 

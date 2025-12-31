@@ -5,10 +5,24 @@ from core.models import Tag
 
 # 学生プロフィール
 class Student(models.Model):
+    # ★ 追加: 学年の選択肢 (データベース値, 表示名)
+    GRADE_CHOICES = (
+        (1, '1年'),
+        (2, '2年'),
+        (3, '3年'),
+        (4, '4年'),
+    )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     school = models.ForeignKey('schools.School', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="所属学校")
     full_name = models.CharField(max_length=100, verbose_name="氏名")
-    grade = models.IntegerField(verbose_name="学年")
+    
+    # ★ 変更: choicesオプションを追加し、デフォルトを1年に設定
+    grade = models.IntegerField(
+        verbose_name="学年",
+        choices=GRADE_CHOICES, 
+        default=1
+    )
     
     comment = models.TextField(
         verbose_name="教員からのコメント", 
@@ -35,6 +49,7 @@ class Student(models.Model):
         verbose_name = "学生プロフィール"
         verbose_name_plural = "学生プロフィール"
 
+# --- 以下変更なし ---
 # 教員プロフィール
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -90,4 +105,4 @@ class StudentTag(models.Model):
 
     class Meta:
         unique_together = ('student', 'tag_type', 'rank') # 同一タイプ内で順位は重複しない
-        ordering = ['tag_type', 'rank']    
+        ordering = ['tag_type', 'rank']
