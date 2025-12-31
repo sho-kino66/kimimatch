@@ -70,6 +70,14 @@ class CompanyRepresentative(models.Model):
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, verbose_name="所属企業")
     full_name = models.CharField(max_length=100, verbose_name="担当者名")
     department = models.CharField(max_length=100, verbose_name="所属部署", blank=True)
+    
+    # ★ 追加: この担当者（部署）固有の求人票URL
+    job_offer_url = models.URLField(
+        verbose_name="求人票URL", 
+        blank=True, 
+        null=True,
+        help_text="部署ごとの採用ページや求人票のリンクがあれば入力してください"
+    )
 
     def __str__(self):
         return f"{self.company.name} - {self.full_name}"

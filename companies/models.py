@@ -4,9 +4,8 @@ from core.models import Tag
 import secrets
 import string
 
-# ★ 追加: ランダムな8文字のコードを生成する関数
+# ランダムな8文字のコードを生成する関数
 def generate_company_code():
-    # 英大文字(A-Z)と数字(0-9)からランダムに選ぶ
     chars = string.ascii_uppercase + string.digits
     return ''.join(secrets.choice(chars) for _ in range(8))
 
@@ -15,7 +14,10 @@ class Company(models.Model):
     industry = models.CharField(max_length=100, verbose_name="業種")
     description = models.TextField(verbose_name="事業内容")
     
-    # ★ 追加: 企業コード (自動生成、重複不可)
+    # ★ 追加: 企業ホームページURL
+    website_url = models.URLField(verbose_name="企業ホームページ", blank=True, null=True)
+
+    # 企業コード
     code = models.CharField(
         max_length=8, 
         default=generate_company_code, 
@@ -25,14 +27,13 @@ class Company(models.Model):
     )
     
     def __str__(self):
-        # 管理画面などでコードも見えるようにする
         return f"{self.name} ({self.code})"
 
     class Meta:
         verbose_name = "企業"
         verbose_name_plural = "企業一覧"
 
-# 企業による学生スカウト (変更なし)
+# --- 以下変更なし (Scout, CompanyTag) ---
 class Scout(models.Model):
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
@@ -46,7 +47,6 @@ class Scout(models.Model):
     def __str__(self):
         return f"{self.company.name}が{self.student.full_name}をスカウト"
     
-# 企業のタグ設定（中間テーブル） (変更なし)
 class CompanyTag(models.Model):
     TAG_TYPE_CHOICES = (
         ('strength', '求める人材の強み'),

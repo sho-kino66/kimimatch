@@ -168,12 +168,18 @@ class TeacherSignUpForm(UserCreationForm):
         )
         return user
 
-# 3. 企業担当者用サインアップフォーム (★修正: 企業コード対応)
+# 3. 企業担当者用サインアップフォーム
 class CompanyRepresentativeSignUpForm(UserCreationForm):
     full_name = forms.CharField(max_length=100, label="担当者名")
     department = forms.CharField(max_length=100, label="所属部署", required=False)
     
-    # ★ 変更: 企業選択プルダウンを廃止し、コード入力に変更
+    # ★ 追加: 求人票URL入力欄
+    job_offer_url = forms.URLField(
+        label="求人票URL", 
+        required=False,
+        widget=forms.URLInput(attrs={'placeholder': 'https://...'})
+    )
+
     company_code = forms.CharField(
         max_length=8,
         label="企業コード",
@@ -183,7 +189,6 @@ class CompanyRepresentativeSignUpForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
     
-    # ★ 追加: コードのチェック
     def clean_company_code(self):
         code = self.cleaned_data.get('company_code')
         if not Company.objects.filter(code=code).exists():
@@ -195,7 +200,6 @@ class CompanyRepresentativeSignUpForm(UserCreationForm):
         user = super().save(commit=False)
         user.save()
         
-        # ★ コードから企業を特定
         code = self.cleaned_data.get('company_code')
         company = Company.objects.get(code=code)
         
@@ -203,10 +207,10 @@ class CompanyRepresentativeSignUpForm(UserCreationForm):
             user=user,
             full_name=self.cleaned_data.get('full_name'),
             department=self.cleaned_data.get('department'),
-            company=company  # ★ ここで企業を保存
+            company=company,
+            job_offer_url=self.cleaned_data.get('job_offer_url') # ★ 保存
         )
         return user
-
 # ---------------------------------------------------------
 # その他のフォーム (変更なし)
 # ---------------------------------------------------------
@@ -245,11 +249,34 @@ class TeacherProfileForm(forms.ModelForm):
             'school': '所属学校',
         }
 
+# 企業担当者プロフィール編集フォーム
 class CompanyRepresentativeProfileForm(forms.ModelForm):
+    # ★ 企業のHPもここで編集できるようにフィールドを追加する場合
+    website_url = forms.URLField(label="企業ホームページ", required=False)
+
     class Meta:
         model = CompanyRepresentative
-        fields = ['full_name', 'department']
+        fields = ['full_name', 'department', 'job_offer_url'] # ★ job_offer_urlを追加
         labels = {
             'full_name': '担当者氏名',
             'department': '所属部署',
+            'job_offer_url': '求人票URL',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # フォーム初期化時に、Companyモデルにある現在のHPのURLを表示する
+        if self.instance and self.instance.company:
+            self.fields['website_url'].initial = self.instance.company.website_url
+
+    def save(self, commit=True):
+        # 担当者情報の保存
+        representative = super().save(commit=False)
+        if commit:
+            representative.save()
+            
+            # 企業HP情報の保存（Companyモデル側の更新）
+            company = representative.company
+            company.website_url = self.cleaned_data['website_url']
+            company.save()
+        return representative

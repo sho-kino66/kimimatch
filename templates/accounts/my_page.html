@@ -277,7 +277,10 @@
         </a>
       </div>
 
-{% elif user_type == 'company' %}
+{# ======================= #}
+    {#      企業担当者の場合     #}
+    {# ======================= #}
+    {% elif user_type == 'company' %}
       
       <h3>担当者情報</h3>
       <div class="info-table">
@@ -294,7 +297,17 @@
             <th>所属部署</th>
             <td>{{ profile.department | default:"未設定" }}</td>
           </tr>
-           <tr>
+          <tr>
+            <th>求人票URL</th>
+            <td>
+              {% if profile.job_offer_url %}
+                <a href="{{ profile.job_offer_url }}" target="_blank">リンクを開く</a>
+              {% else %}
+                <span style="color: #999;">未設定</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <th>ログインID</th>
             <td>{{ profile.user.username }}</td>
           </tr>
@@ -312,16 +325,26 @@
             <th>事業内容</th>
             <td class="description">{{ profile.company.description | linebreaksbr }}</td>
           </tr>
+          <tr>
+             <th>企業HP</th>
+             <td>
+               {% if profile.company.website_url %}
+                 <a href="{{ profile.company.website_url }}" target="_blank">リンクを開く</a>
+               {% else %}
+                 <span style="color: #999;">未設定</span>
+               {% endif %}
+             </td>
+           </tr>
         </table>
       </div>
 
       <div style="text-align: right; margin-top: 15px;">
         
-        <a href="#" class="btn btn-edit">
+        <a href="{% url 'accounts:profile_update' %}" class="btn btn-edit">
           担当者プロフィールを編集
         </a>
 
-        <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-edit"style="margin-left: 10px; color: #d9a900; border: none;">
+        <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-edit" style="margin-left: 10px; color: #d9a900; border: none;">
            マッチングタグ設定
         </a>
 
