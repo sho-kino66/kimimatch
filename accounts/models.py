@@ -78,6 +78,13 @@ class CompanyRepresentative(models.Model):
         null=True,
         help_text="部署ごとの採用ページや求人票のリンクがあれば入力してください"
     )
+    job_offer_pdf = models.FileField(
+        verbose_name="求人票PDF",
+        upload_to='job_offers/',  # media/job_offers/ に保存されます
+        blank=True,
+        null=True,
+        help_text="PDF形式の求人票をアップロードできます"
+    )
 
     def __str__(self):
         return f"{self.company.name} - {self.full_name}"

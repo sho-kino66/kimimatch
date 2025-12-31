@@ -277,7 +277,7 @@
         </a>
       </div>
 
-{# ======================= #}
+    {# ======================= #}
     {#      企業担当者の場合     #}
     {# ======================= #}
     {% elif user_type == 'company' %}
@@ -302,6 +302,18 @@
             <td>
               {% if profile.job_offer_url %}
                 <a href="{{ profile.job_offer_url }}" target="_blank">リンクを開く</a>
+              {% else %}
+                <span style="color: #999;">未設定</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>求人票PDF</th>
+            <td>
+              {% if profile.job_offer_pdf %}
+                <a href="{{ profile.job_offer_pdf.url }}" target="_blank" style="color: #d9a900; font-weight: bold;">
+                  📄 PDFを確認する
+                </a>
               {% else %}
                 <span style="color: #999;">未設定</span>
               {% endif %}

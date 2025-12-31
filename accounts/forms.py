@@ -180,6 +180,12 @@ class CompanyRepresentativeSignUpForm(UserCreationForm):
         widget=forms.URLInput(attrs={'placeholder': 'https://...'})
     )
 
+    job_offer_pdf = forms.FileField(
+        label="求人票PDF",
+        required=False,
+        help_text="求人票のPDFファイルがあればアップロードしてください"
+    )
+
     company_code = forms.CharField(
         max_length=8,
         label="企業コード",
@@ -208,7 +214,8 @@ class CompanyRepresentativeSignUpForm(UserCreationForm):
             full_name=self.cleaned_data.get('full_name'),
             department=self.cleaned_data.get('department'),
             company=company,
-            job_offer_url=self.cleaned_data.get('job_offer_url') # ★ 保存
+            job_offer_url=self.cleaned_data.get('job_offer_url'),
+            job_offer_pdf=self.cleaned_data.get('job_offer_pdf')
         )
         return user
 # ---------------------------------------------------------
@@ -256,11 +263,12 @@ class CompanyRepresentativeProfileForm(forms.ModelForm):
 
     class Meta:
         model = CompanyRepresentative
-        fields = ['full_name', 'department', 'job_offer_url'] # ★ job_offer_urlを追加
+        fields = ['full_name', 'department', 'job_offer_url', 'job_offer_pdf'] # ★ job_offer_urlを追加
         labels = {
             'full_name': '担当者氏名',
             'department': '所属部署',
             'job_offer_url': '求人票URL',
+            'job_offer_pdf': '求人票PDF',
         }
 
     def __init__(self, *args, **kwargs):

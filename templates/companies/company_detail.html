@@ -7,6 +7,82 @@
 
     <h2>{{ company.name }}</h2>
 
+    <style>
+      /* リンクエリアのコンテナ */
+      .company-links-area {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      
+      .links-label {
+        width: 100%;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 5px;
+      }
+
+      /* アイコンボタンのデザイン */
+      .link-badge {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid transparent;
+        color: #333;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      
+      .link-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        text-decoration: none;
+      }
+
+      .link-badge .icon {
+        font-size: 1.2rem;
+        margin-right: 6px;
+      }
+
+      /* 企業HP用 */
+      .btn-website {
+        border-color: #bee3f8;
+        background-color: #ebf8ff;
+        color: #2b6cb0;
+      }
+
+      /* 求人用(Web) */
+      .btn-job-web {
+        border-color: #feebc8;
+        background-color: #fffaf0;
+        color: #c05621;
+      }
+
+      /* 求人用(PDF) */
+      .btn-job-pdf {
+        border-color: #f5c6cb;
+        background-color: #fff5f5;
+        color: #c53030;
+      }
+      
+      .dept-text {
+        font-size: 0.8rem;
+        color: #666;
+        margin-left: 5px;
+      }
+    </style>
+
     {% if user.student and match_rate is not None %}
       <div style="margin-bottom: 20px; padding: 15px; background-color: #fff5f5; border: 2px solid #ff6b6b; border-radius: 10px; color: #c0392b; text-align: center;">
         <span style="font-size: 1.1rem;">あなたとのマッチ度</span><br>
@@ -15,37 +91,33 @@
     {% endif %}
 
     {% if matched_strengths or matched_conditions %}
-          <hr style="border-top: 1px dashed #ffcccc; margin: 15px 0;">
-          <div style="text-align: left; font-size: 0.95rem;">
-            
-            {% if matched_strengths %}
-              <div style="margin-bottom: 8px;">
-                <strong style="color: #e53e3e;">⚡ マッチしたスキル・強み:</strong><br>
-                {% for tag in matched_strengths %}
-                  <span style="display: inline-block; background: #fff; border: 1px solid #fc8181; color: #c53030; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
-                    {{ tag }}
-                  </span>
-                {% endfor %}
-              </div>
-            {% endif %}
-
-            {% if matched_conditions %}
-              <div>
-                <strong style="color: #3182ce;">🤝 マッチした条件・待遇:</strong><br>
-                {% for tag in matched_conditions %}
-                  <span style="display: inline-block; background: #fff; border: 1px solid #63b3ed; color: #2b6cb0; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
-                    {{ tag }}
-                  </span>
-                {% endfor %}
-              </div>
-            {% endif %}
-            
+      <hr style="border-top: 1px dashed #ffcccc; margin: 15px 0;">
+      <div style="text-align: left; font-size: 0.95rem;">
+        {% if matched_strengths %}
+          <div style="margin-bottom: 8px;">
+            <strong style="color: #e53e3e;">⚡ マッチしたスキル・強み:</strong><br>
+            {% for tag in matched_strengths %}
+              <span style="display: inline-block; background: #fff; border: 1px solid #fc8181; color: #c53030; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
+                {{ tag }}
+              </span>
+            {% endfor %}
           </div>
         {% endif %}
+        {% if matched_conditions %}
+          <div>
+            <strong style="color: #3182ce;">🤝 マッチした条件・待遇:</strong><br>
+            {% for tag in matched_conditions %}
+              <span style="display: inline-block; background: #fff; border: 1px solid #63b3ed; color: #2b6cb0; padding: 2px 8px; border-radius: 15px; font-size: 0.85rem; margin: 2px;">
+                {{ tag }}
+              </span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
     
     {% if user.student %} 
       <div class="action-box">
-        
         {% if is_favorited %}
           <form action="{% url 'companies:remove_favorite' company.pk %}" method="post">
             {% csrf_token %}
@@ -94,11 +166,43 @@
         </table>
       </div>
     </div>
+
+    <div class="company-links-area">
+      <div class="links-label">🔗 関連リンク / 求人情報</div>
+
+      {% if company.website_url %}
+        <a href="{{ company.website_url }}" target="_blank" class="link-badge btn-website" title="企業公式サイトへ">
+          <span class="icon">🌐</span> 公式サイト
+        </a>
+      {% endif %}
+
+      {% for rep in company.companyrepresentative_set.all %}
+        
+        {% if rep.job_offer_url %}
+          <a href="{{ rep.job_offer_url }}" target="_blank" class="link-badge btn-job-web" title="WEB求人票を開く">
+            <span class="icon">🔗</span> WEB求人
+            {% if rep.department %}<span class="dept-text">({{ rep.department }})</span>{% endif %}
+          </a>
+        {% endif %}
+
+        {% if rep.job_offer_pdf %}
+          <a href="{{ rep.job_offer_pdf.url }}" target="_blank" class="link-badge btn-job-pdf" title="PDF求人票を開く">
+            <span class="icon">📄</span> PDF求人
+            {% if rep.department %}<span class="dept-text">({{ rep.department }})</span>{% endif %}
+          </a>
+        {% endif %}
+
+      {% endfor %}
+
+      {% if not company.website_url and not company.companyrepresentative_set.all %}
+        <span style="color: #999; font-size: 0.9rem;">（登録されているリンクはありません）</span>
+      {% endif %}
+    </div>
     
     <hr>
     
     {% if request.GET.next %}
-      <a href="{{ request.GET.next }}" class="back-link">← お気に入り一覧に戻る</a>
+      <a href="{{ request.GET.next }}" class="back-link">← 前の画面に戻る</a>
     {% else %}
       <a href="{% url 'companies:list' %}" class="back-link">← 企業一覧に戻る</a>
     {% endif %}
