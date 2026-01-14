@@ -158,12 +158,6 @@
     <div id="result"></div>
  
     <script>
-    window.addEventListener("DOMContentLoaded", () => {
-    const saved = localStorage.getItem("score_result");
-    if (saved) {
-        document.getElementById("result").innerHTML = saved;
-      }
-    });
     document.getElementById("grade-btn").addEventListener("click", async () => {
         const file = document.getElementById("file-input").files[0];
         const spinner = document.getElementById("loading-spinner");
@@ -232,8 +226,6 @@
                 </div>
                 `;
             }
-
-            localStorage.setItem("score_result", resultDiv.innerHTML);
  
         } catch (err) {
             resultDiv.innerText = "通信エラー: " + err;

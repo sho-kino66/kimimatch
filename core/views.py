@@ -41,7 +41,7 @@ class SchoolApplicationView(FormView):
 
     def form_valid(self, form):
         data = form.cleaned_data
-        subject = f"【KimiMatch】学校利用の申し込み: {data['school_name']}"
+        subject = f"【Kimimatch】学校利用の申し込み: {data['school_name']}"
         message = f"学校名: {data['school_name']}\n担当者: {data['contact_name']}\nEmail: {data['email']}\nTel: {data['phone']}\n住所: {data['address']}"
         
         superuser_emails = list(User.objects.filter(is_superuser=True).values_list('email', flat=True))
@@ -58,7 +58,7 @@ class CompanyApplicationView(FormView):
 
     def form_valid(self, form):
         data = form.cleaned_data
-        subject = f"【KimiMatch】企業利用の申し込み: {data['company_name']}"
+        subject = f"【Kimimatch】企業利用の申し込み: {data['company_name']}"
         message = f"企業名: {data['company_name']}\n担当者: {data['contact_name']}\nEmail: {data['email']}\nTel: {data['phone']}\n住所: {data['address']}"
         
         superuser_emails = list(User.objects.filter(is_superuser=True).values_list('email', flat=True))
