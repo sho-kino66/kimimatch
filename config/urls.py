@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import path, include  # include をまとめてインポート
 from django.conf import settings
 from django.conf.urls.static import static
+from accounts import views as account_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,7 @@ urlpatterns = [
     # お知らせやトップページは core アプリが担当
     # 空文字 '' にすることで、ルートURL（http://127.0.0.1:8000/）へのアクセスも core.urls で処理します
     path('', include('core.urls')), 
+    path('grade_file/', account_views.grade_file, name='grade_file'),
 ]
 
 # (開発環境でのみ、メディアファイルを提供するための設定)

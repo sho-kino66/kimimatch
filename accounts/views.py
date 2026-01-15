@@ -1,3 +1,5 @@
+import json
+import requests # ← 外部と通信するためのライブラリ
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, FormView
@@ -9,15 +11,16 @@ from .forms import (
     TeacherCommentForm,
     # ★ StudentProfileUpdateForm は不要になったので削除し、新しく3つのフォームを追加
     StudentProfileForm, TeacherProfileForm, CompanyRepresentativeProfileForm,
-    StudentTagUpdateForm, CompanyTagUpdateForm 
-)
+    StudentTagUpdateForm, CompanyTagUpdateForm)
 from companies.models import Company, Scout
 from chat.models import ChatRoom
 from django.db.models import Q, Count
-from portfolios.models import Portfolio
+from portfolios.models import Portfolio,PortfolioItem
 from core.models import Announcement
 from django.core.paginator import Paginator
 from core.utils import calculate_match_percentage
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # ==================================
 # 1. 新規登録（サインアップ）関連
@@ -413,3 +416,91 @@ class CompanyTagUpdateView(LoginRequiredMixin, CompanyOnlyMixin, FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
+
+@csrf_exempt
+def grade_file(request):
+    if request.method == 'POST':
+        try:
+            uploaded_file = request.FILES.get('upload')
+            if not uploaded_file:
+                 return JsonResponse({'error': 'ファイルがありません'}, status=400)
+
+            # --------------------------------------------------
+            # 1. AIサーバー（Colab）へ送信
+            # --------------------------------------------------
+            # ★重要: ColabのURLを確認して更新してください
+            external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
+            
+            # 警告スキップ用ヘッダー
+            headers = {
+                "ngrok-skip-browser-warning": "true",
+                "User-Agent": "Django-Client"
+            }
+
+            # ファイルポインタを先頭へ
+            if hasattr(uploaded_file, 'seek'):
+                uploaded_file.seek(0)
+
+            files = {'upload': (uploaded_file.name, uploaded_file, uploaded_file.content_type)}
+            
+            response = requests.post(
+                external_ai_url, 
+                files=files, 
+                headers=headers, 
+                timeout=120, 
+                verify=False
+            )
+
+            if response.status_code != 200:
+                return JsonResponse({'error': f'AIサーバーエラー: {response.status_code}', 'details': response.text}, status=502)
+
+            ai_data = response.json()
+
+            # --------------------------------------------------
+            # 2. データベースへ保存 (ここを追加！)
+            # --------------------------------------------------
+            # ログイン中のユーザーのみ保存（未ログインなら結果表示のみ）
+            if request.user.is_authenticated and hasattr(request.user, 'student'):
+                
+                # AIの結果テキストを取り出す（PDFの場合とZIPの場合で構造が違うので注意）
+                ai_result_text = ""
+                if 'result' in ai_data:
+                    # PDF単体の場合
+                    ai_result_text = ai_data['result']
+                elif 'files' in ai_data:
+                    # ZIPの場合、最初のファイルの採点結果だけ代表して入れる（または加工する）
+                    ai_result_text = ai_data['files'][0]['result']
+                    ai_result_text += "\n\n(他ファイルの結果は省略されました)"
+
+                # A. ポートフォリオ（表紙）を作成
+                portfolio = Portfolio.objects.create(
+                    student=request.user.student,  # ログイン中の学生
+                    title=f"AI自動採点: {uploaded_file.name}",
+                    description=ai_result_text,    # ★ここ説明文にAIの結果を保存
+                    # teacher_comment は空にしておく（後で先生が書くため）
+                )
+
+                # B. ファイル自体を保存（PortfolioItem）
+                # ★重要: requestsで送信したため、ファイルポインタが末尾にあります。
+                # 保存前にもう一度先頭に戻す必要があります。
+                if hasattr(uploaded_file, 'seek'):
+                    uploaded_file.seek(0)
+
+                PortfolioItem.objects.create(
+                    portfolio=portfolio,
+                    file=uploaded_file
+                )
+                
+                # フロントエンドに「保存ID」も返してあげると便利
+                ai_data['saved_portfolio_id'] = portfolio.id
+
+            # --------------------------------------------------
+            # 3. 結果を返す
+            # --------------------------------------------------
+            return JsonResponse(ai_data)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': f'システムエラー: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'POSTのみ許可'}, status=400)

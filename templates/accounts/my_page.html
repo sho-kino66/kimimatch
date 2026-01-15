@@ -158,81 +158,130 @@
     <div id="result"></div>
  
     <script>
-    document.getElementById("grade-btn").addEventListener("click", async () => {
-        const file = document.getElementById("file-input").files[0];
-        const spinner = document.getElementById("loading-spinner");
-        const resultDiv = document.getElementById("result");
- 
-        if (!file) {
-            alert("PDF または ZIP を選択してください");
+document.getElementById("grade-btn").addEventListener("click", async () => {
+    const file = document.getElementById("file-input").files[0];
+    const spinner = document.getElementById("loading-spinner");
+    const resultDiv = document.getElementById("result");
+
+    if (!file) {
+        alert("PDF または ZIP を選択してください");
+        return;
+    }
+
+    spinner.style.display = "inline-block";
+    resultDiv.innerHTML = "";
+
+    const formData = new FormData();
+    formData.append("upload", file);
+
+    // ★URL設定（ここは変えないでOK）
+    const apiUrl = "/grade_file/"; 
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+        console.log("サーバーJSON:", data);
+
+        if (data.error) {
+            resultDiv.innerText = "エラー: " + data.error;
             return;
         }
- 
-        spinner.style.display = "inline-block";
-        resultDiv.innerHTML = "";
- 
-        const formData = new FormData();
-        formData.append("upload", file);
- 
-        const apiUrl = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/";
- 
-        try {
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                body: formData
-            });
- 
-            const data = await response.json();
-            console.log("サーバーJSON:", data);
- 
-            if (data.error) {
-                resultDiv.innerText = "エラー: " + data.error;
-                return;
-            }
- 
-            // ✅ ZIP の場合（複数ファイル）
-            if (data.files) {
-                data.files.forEach(f => {
-                    const r = f.result;
- 
-                    resultDiv.innerHTML += `
-                    <div class="score-box">
-                      <h4>📄 ${f.filename}</h4>
-                      正確性: ${r.正確性} / 25<br>
-                      可読性: ${r.可読性} / 25<br>
-                      パフォーマンス: ${r["パフォーマンス"]} / 25<br>
-                      スタイル: ${r.スタイル} / 25<br>
-                      <b>総合: ${r.総合} / 100</b><br><br>
-                      📝 コメント:<br>${r.コメント}
-                      <div class="preview-box">${f.preview}</div>
-                    </div>
-                    `;
-                });
- 
-            // ✅ PDF 単体
+
+        const renderResult = (filename, resultData, previewText) => {
+            // デフォルト値（取得できなかった場合はハイフン表示）
+            let accuracy = "-", readability = "-", performance = "-", style = "-", total = "-";
+            let comment = "";
+
+            // ★AIが文字列（文章）で返してきた場合の「超・強力解析ロジック」
+            if (typeof resultData === "string") {
+                
+                // 数字を抜き出す関数
+                const extractScore = (patterns) => {
+                    for (const pattern of patterns) {
+                        // パターン（例: "正確性"）の後ろにある数字を探す
+                        // [:=/ ] などの記号を飛ばして数字(\d+)をキャッチ
+                        const regex = new RegExp(`${pattern}[^0-9]*(\\d+)`);
+                        const match = resultData.match(regex);
+                        if (match) {
+                            let score = parseInt(match[1]);
+                            // ★補正: もし100点満点で返ってきたら、4で割って25点満点にする
+                            if (score > 25 && score <= 100) {
+                                score = Math.round(score / 4);
+                            }
+                            return score;
+                        }
+                    }
+                    return "-"; // 見つからなかったらハイフン
+                };
+
+                // 表記ゆれに対応（日本語、中国語、英語、計算式に対応）
+                accuracy = extractScore(["正確性", "正确性", "Accuracy", "Correctness"]);
+                readability = extractScore(["可読性", "可读性", "Readability"]);
+                // 「パフォ」で切れていても「パフォ」だけで検索できるようにする
+                performance = extractScore(["パフォーマンス", "性能", "Performance", "パフォ"]);
+                style = extractScore(["スタイル", "Style"]);
+                
+                // 総合得点は、各項目の合計を計算して出す（データがない場合は仮計算）
+                const safeAdd = (val) => (typeof val === 'number' ? val : 0);
+                const calcTotal = safeAdd(accuracy) + safeAdd(readability) + safeAdd(performance) + safeAdd(style);
+                total = (calcTotal > 0) ? calcTotal : "-";
+
+                // コメント抽出（"--- 計算履歴 ---" などの実行ログを隠すための簡易処理）
+                comment = resultData; 
+
             } else {
-                const r = data.result;
- 
-                resultDiv.innerHTML = `
-                <div class="score-box">
-                  <h4>📄 ${data.filename}</h4>
-                  正確性: ${r.正確性} / 25<br>
-                  可読性: ${r.可読性} / 25<br>
-                  パフォーマンス: ${r["パフォーマンス"]} / 25<br>
-                  スタイル: ${r.スタイル} / 25<br>
-                  <b>総合: ${r.総合} / 100</b><br><br>
-                  📝 コメント:<br>${r.コメント}
-                  <div class="preview-box">${data.preview}</div>
-                </div>
-                `;
+                // 万が一、ちゃんとしたJSONオブジェクトで返ってきた場合
+                const r = resultData || {};
+                accuracy = r["正確性"] || r["accuracy"] || "-";
+                readability = r["可読性"] || r["readability"] || "-";
+                performance = r["パフォーマンス"] || r["performance"] || "-";
+                style = r["スタイル"] || r["style"] || "-";
+                total = r["総合"] || r["total"] || "-";
+                comment = r["コメント"] || r["comment"] || "コメントなし";
             }
- 
-        } catch (err) {
-            resultDiv.innerText = "通信エラー: " + err;
-        } finally {
-            spinner.style.display = "none";
+
+            const preview = previewText || "";
+
+            return `
+            <div class="score-box">
+              <h4>📄 ${filename}</h4>
+              <table style="width: 100%; margin-bottom: 10px;">
+                  <tr><td>正確性: <b>${accuracy}</b> / 25</td><td>可読性: <b>${readability}</b> / 25</td></tr>
+                  <tr><td>パフォーマンス: <b>${performance}</b> / 25</td><td>スタイル: <b>${style}</b> / 25</td></tr>
+              </table>
+              <div style="text-align: right; font-size: 1.2em; border-top: 1px solid #ddd; padding-top:5px;">
+                  総合評価: <b>${total}</b> / 100
+              </div>
+              <br>
+              📝 AIからの出力ログ:<br>
+              <div style="background:#f4f4f4; padding:10px; border-radius:5px; white-space: pre-wrap; max-height: 150px; overflow-y: auto; font-size: 0.9em; color: #555;">${comment}</div>
+              <br>
+              <div class="preview-box">${preview}</div>
+            </div>
+            `;
+        };
+
+        if (data.files && Array.isArray(data.files)) {
+            data.files.forEach(f => {
+                const res = f.result || f;
+                resultDiv.innerHTML += renderResult(f.filename, res, f.preview);
+            });
+        } else {
+            const res = data.result || data;
+            resultDiv.innerHTML = renderResult(data.filename || file.name, res, data.preview);
         }
-    });
+
+    } catch (err) {
+        console.error(err);
+        resultDiv.innerText = "通信エラー: " + err;
+    } finally {
+        spinner.style.display = "none";
+    }
+});
     </script>
  
     <!-- ======================= -->
