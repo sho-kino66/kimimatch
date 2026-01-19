@@ -133,13 +133,17 @@
  
       .preview-box {
         margin-top: 10px;
-        background: #111;
-        color: #0f0;
-        padding: 10px;
+        background: #1e1e1e; /* コードエディタっぽい色に */
+        color: #0f0;      /* 文字色を少し見やすく */
+        padding: 15px;
         border-radius: 6px;
-        font-size: 12px;
-        max-height: 300px;
+        font-size: 13px;
+        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* 等幅フォント */
+        line-height: 1.5;
+        max-height: 400px;   /* 少し広げる */
         overflow: auto;
+        white-space: pre-wrap; /* 改行を維持 */
+        border: 1px solid #333;
       }
     </style>
  
@@ -230,8 +234,14 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
                 const calcTotal = safeAdd(accuracy) + safeAdd(readability) + safeAdd(performance) + safeAdd(style);
                 total = (calcTotal > 0) ? calcTotal : "-";
 
-                // コメント抽出（"--- 計算履歴 ---" などの実行ログを隠すための簡易処理）
-                comment = resultData; 
+                // コメント抽出（"コメント:" 以降を取得）
+                const commentMatch = resultData.match(/(?:コメント|Comment)[:：]\s*([\s\S]*)/i);
+                if (commentMatch) {
+                    comment = commentMatch[1].trim();
+                } else {
+                    // "コメント:"が見つからない場合、スコア行などを除外して残りを表示
+                    comment = resultData.replace(/^.*[:：].*\d+.*$/gm, '').trim();
+                }
 
             } else {
                 // 万が一、ちゃんとしたJSONオブジェクトで返ってきた場合
@@ -244,7 +254,16 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
                 comment = r["コメント"] || r["comment"] || "コメントなし";
             }
 
-            const preview = previewText || "";
+            const escapeHtml = (str) => {
+                if (!str) return "";
+                return str.replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#039;');
+            };
+
+            const preview = previewText ? escapeHtml(previewText) : "（プレビューなし）";
 
             return `
             <div class="score-box">
@@ -257,8 +276,10 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
                   総合評価: <b>${total}</b> / 100
               </div>
               <br>
-              📝 AIからの出力ログ:<br>
-              <div style="background:#f4f4f4; padding:10px; border-radius:5px; white-space: pre-wrap; max-height: 150px; overflow-y: auto; font-size: 0.9em; color: #555;">${comment}</div>
+              <div style="background:#fff; padding:10px; border: 1px solid #ddd; border-radius:5px; font-size: 0.95em; color: #333;">
+                  <b>コメント:</b><br>
+                  ${comment.replace(/\n/g, '<br>')}
+              </div>
               <br>
               <div class="preview-box">${preview}</div>
             </div>

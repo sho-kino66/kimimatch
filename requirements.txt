@@ -28,3 +28,7 @@ Twisted==25.5.0
 txaio==23.6.1
 typing_extensions==4.15.0
 zope.interface==8.0.1
+certifi==2024.12.14
+charset-normalizer==3.4.1
+requests==2.32.3
+urllib3==2.3.0
