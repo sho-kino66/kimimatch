@@ -168,7 +168,7 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
     const resultDiv = document.getElementById("result");
 
     if (!file) {
-        alert("PDF または ZIP を選択してください");
+        alert("ファイルを選択してください");
         return;
     }
 
@@ -178,127 +178,81 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
     const formData = new FormData();
     formData.append("upload", file);
 
-    // ★URL設定（ここは変えないでOK）
-    const apiUrl = "/grade_file/"; 
-
     try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch("/grade_file/", {
             method: "POST",
             body: formData
         });
 
         const data = await response.json();
-        console.log("サーバーJSON:", data);
+        console.log("デバッグ用受信データ:", data);
 
-        if (data.error) {
-            resultDiv.innerText = "エラー: " + data.error;
+        if (data.error || data.status !== 'success') {
+            resultDiv.innerText = "エラー: " + (data.error || "採点に失敗しました");
             return;
         }
 
-        const renderResult = (filename, resultData, previewText) => {
-            // デフォルト値（取得できなかった場合はハイフン表示）
-            let accuracy = "-", readability = "-", performance = "-", style = "-", total = "-";
-            let comment = "";
+        const rawText = data.raw_text || "";
+        const serverTotal = data.total_score || "-";
 
-            // ★AIが文字列（文章）で返してきた場合の「超・強力解析ロジック」
-            if (typeof resultData === "string") {
-                
-                // 数字を抜き出す関数
-                const extractScore = (patterns) => {
-                    for (const pattern of patterns) {
-                        // パターン（例: "正確性"）の後ろにある数字を探す
-                        // [:=/ ] などの記号を飛ばして数字(\d+)をキャッチ
-                        const regex = new RegExp(`${pattern}[^0-9]*(\\d+)`);
-                        const match = resultData.match(regex);
-                        if (match) {
-                            let score = parseInt(match[1]);
-                            // ★補正: もし100点満点で返ってきたら、4で割って25点満点にする
-                            if (score > 25 && score <= 100) {
-                                score = Math.round(score / 4);
-                            }
-                            return score;
-                        }
-                    }
-                    return "-"; // 見つからなかったらハイフン
-                };
-
-                // 表記ゆれに対応（日本語、中国語、英語、計算式に対応）
-                accuracy = extractScore(["正確性", "正确性", "Accuracy", "Correctness"]);
-                readability = extractScore(["可読性", "可读性", "Readability"]);
-                // 「パフォ」で切れていても「パフォ」だけで検索できるようにする
-                performance = extractScore(["パフォーマンス", "性能", "Performance", "パフォ"]);
-                style = extractScore(["スタイル", "Style"]);
-                
-                // 総合得点は、各項目の合計を計算して出す（データがない場合は仮計算）
-                const safeAdd = (val) => (typeof val === 'number' ? val : 0);
-                const calcTotal = safeAdd(accuracy) + safeAdd(readability) + safeAdd(performance) + safeAdd(style);
-                total = (calcTotal > 0) ? calcTotal : "-";
-
-                // コメント抽出（"コメント:" 以降を取得）
-                const commentMatch = resultData.match(/(?:コメント|Comment)[:：]\s*([\s\S]*)/i);
-                if (commentMatch) {
-                    comment = commentMatch[1].trim();
-                } else {
-                    // "コメント:"が見つからない場合、スコア行などを除外して残りを表示
-                    comment = resultData.replace(/^.*[:：].*\d+.*$/gm, '').trim();
-                }
-
-            } else {
-                // 万が一、ちゃんとしたJSONオブジェクトで返ってきた場合
-                const r = resultData || {};
-                accuracy = r["正確性"] || r["accuracy"] || "-";
-                readability = r["可読性"] || r["readability"] || "-";
-                performance = r["パフォーマンス"] || r["performance"] || "-";
-                style = r["スタイル"] || r["style"] || "-";
-                total = r["総合"] || r["total"] || "-";
-                comment = r["コメント"] || r["comment"] || "コメントなし";
+        // --- AI特有の表記ゆれに対応した抽出関数 ---
+        const extract = (keywords) => {
+            for (const key of keywords) {
+                // キーワードの後に続く最初の数字（評価: 25/25 の 25 など）を探す
+                const regex = new RegExp(`${key}[^0-9]*(\\d+)`);
+                const match = rawText.match(regex);
+                if (match) return match[1];
             }
-
-            const escapeHtml = (str) => {
-                if (!str) return "";
-                return str.replace(/&/g, '&amp;')
-                          .replace(/</g, '&lt;')
-                          .replace(/>/g, '&gt;')
-                          .replace(/"/g, '&quot;')
-                          .replace(/'/g, '&#039;');
-            };
-
-            const preview = previewText ? escapeHtml(previewText) : "（プレビューなし）";
-
-            return `
-            <div class="score-box">
-              <h4>📄 ${filename}</h4>
-              <table style="width: 100%; margin-bottom: 10px;">
-                  <tr><td>正確性: <b>${accuracy}</b> / 25</td><td>可読性: <b>${readability}</b> / 25</td></tr>
-                  <tr><td>パフォーマンス: <b>${performance}</b> / 25</td><td>スタイル: <b>${style}</b> / 25</td></tr>
-              </table>
-              <div style="text-align: right; font-size: 1.2em; border-top: 1px solid #ddd; padding-top:5px;">
-                  総合評価: <b>${total}</b> / 100
-              </div>
-              <br>
-              <div style="background:#fff; padding:10px; border: 1px solid #ddd; border-radius:5px; font-size: 0.95em; color: #333;">
-                  <b>コメント:</b><br>
-                  ${comment.replace(/\n/g, '<br>')}
-              </div>
-              <br>
-              <div class="preview-box">${preview}</div>
-            </div>
-            `;
+            return "-";
         };
 
-        if (data.files && Array.isArray(data.files)) {
-            data.files.forEach(f => {
-                const res = f.result || f;
-                resultDiv.innerHTML += renderResult(f.filename, res, f.preview);
-            });
-        } else {
-            const res = data.result || data;
-            resultDiv.innerHTML = renderResult(data.filename || file.name, res, data.preview);
-        }
+        // 各項目の点数を抽出
+        const scores = {
+            accuracy:    extract(["正確性", "精确性", "Accuracy"]),
+            readability: extract(["可読性", "可读性", "Readability"]),
+            performance: extract(["パフォーマンス", "性能", "Performance"]),
+            style:       extract(["スタイル", "格式", "Style", "規約"])
+        };
+
+        // --- HTML表示の組み立て ---
+        const escapeHtml = (str) => str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])) : "";
+
+        resultDiv.innerHTML = `
+            <div class="score-box" style="border-left: 5px solid #4a90e2; padding-left: 20px;">
+                <h4 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    ✅ 採点完了: ${data.filename || "ファイル"} (ID: ${data.saved_portfolio_id})
+                </h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        正確性: <span style="font-size: 1.2em; color: #d9534f; font-weight: bold;">${scores.accuracy}</span> / 25
+                    </div>
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        可読性: <span style="font-size: 1.2em; color: #5bc0de; font-weight: bold;">${scores.readability}</span> / 25
+                    </div>
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        性能: <span style="font-size: 1.2em; color: #f0ad4e; font-weight: bold;">${scores.performance}</span> / 25
+                    </div>
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        スタイル: <span style="font-size: 1.2em; color: #5cb85c; font-weight: bold;">${scores.style}</span> / 25
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: 10px; padding: 10px; background: #333; color: #fff; border-radius: 8px;">
+                    <span style="font-size: 1.1em;">総合スコア:</span> 
+                    <span style="font-size: 1.8em; font-weight: bold; color: #00ff00;">${serverTotal}</span> / 100
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <strong style="display: block; margin-bottom: 8px; color: #555;">🤖 AI詳細レポート</strong>
+                    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ccc; white-space: pre-wrap; font-size: 0.9em; line-height: 1.6; color: #333; max-height: 400px; overflow-y: auto;">${escapeHtml(rawText)}</div>
+                </div>
+            </div>
+        `;
 
     } catch (err) {
-        console.error(err);
-        resultDiv.innerText = "通信エラー: " + err;
+        console.error("JavaScript Error:", err);
+        resultDiv.innerText = "エラーが発生しました。コンソールを確認してください。";
     } finally {
         spinner.style.display = "none";
     }

@@ -1,4 +1,6 @@
+import re
 import json
+import traceback
 import requests # ← 外部と通信するためのライブラリ
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -419,88 +421,86 @@ class CompanyTagUpdateView(LoginRequiredMixin, CompanyOnlyMixin, FormView):
 
 @csrf_exempt
 def grade_file(request):
-    if request.method == 'POST':
-        try:
-            uploaded_file = request.FILES.get('upload')
-            if not uploaded_file:
-                 return JsonResponse({'error': 'ファイルがありません'}, status=400)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POSTのみ許可'}, status=400)
 
-            # --------------------------------------------------
-            # 1. AIサーバー（Colab）へ送信
-            # --------------------------------------------------
-            # ★重要: ColabのURLを確認して更新してください
-            external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
+    try:
+        uploaded_file = request.FILES.get('upload')
+        if not uploaded_file:
+            return JsonResponse({'error': 'ファイルがありません'}, status=400)
+
+        # --------------------------------------------------
+        # 1. AIサーバー（Colab）へ送信 (URLは適宜更新してください)
+        # --------------------------------------------------
+        external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
+        headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
+
+        uploaded_file.seek(0)
+        files = {'upload': (uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)}
+        
+        response = requests.post(external_ai_url, files=files, headers=headers, timeout=180, verify=False)
+
+        if response.status_code != 200:
+            return JsonResponse({'error': f'AIサーバーエラー: {response.status_code}'}, status=502)
+
+        ai_data = response.json()
+        ai_result_text = ai_data.get('result', '')
+
+        # --------------------------------------------------
+        # 2. スコアの抽出 (ここを大幅修正！)
+        # --------------------------------------------------
+        def get_score(name_list):
+            """
+            日本語と中国語の表記ゆれに対応して数字を抜き出す関数
+            """
+            for name in name_list:
+                # 「正確性: 25」や「正確性 25」の形式を探す
+                match = re.search(fr'{name}[:：]?\s*(\d+)', ai_result_text)
+                if match:
+                    return int(match.group(1))
+            return 0
+
+        # 各項目を個別に抜き出す (AIが間違えて中国語を混ぜても拾えるように)
+        s1 = get_score(["正確性", "正确性"])
+        s2 = get_score(["可読性", "可读性"])
+        s3 = get_score(["パフォーマンス", "性能"])
+        s4 = get_score(["スタイル", "格式"])
+
+        # 【重要】合計はAIの数値を使わず、ここで計算する！
+        # これにより 25+20+25+20=90 と正しく算出されます
+        total_score = s1 + s2 + s3 + s4
+
+        # --------------------------------------------------
+        # 3. データベースへ保存
+        # --------------------------------------------------
+        saved_id = None
+        if request.user.is_authenticated:
+            student_profile = getattr(request.user, 'student', None)
             
-            # 警告スキップ用ヘッダー
-            headers = {
-                "ngrok-skip-browser-warning": "true",
-                "User-Agent": "Django-Client"
-            }
-
-            # ファイルポインタを先頭へ
-            if hasattr(uploaded_file, 'seek'):
-                uploaded_file.seek(0)
-
-            files = {'upload': (uploaded_file.name, uploaded_file, uploaded_file.content_type)}
-            
-            response = requests.post(
-                external_ai_url, 
-                files=files, 
-                headers=headers, 
-                timeout=120, 
-                verify=False
+            portfolio = Portfolio.objects.create(
+                student=student_profile,
+                title=f"AI採点結果: {uploaded_file.name}",
+                description=ai_result_text,
+                # もしPortfolioモデルにscoreフィールドを追加したなら
+                # score=total_score 
             )
 
-            if response.status_code != 200:
-                return JsonResponse({'error': f'AIサーバーエラー: {response.status_code}', 'details': response.text}, status=502)
+            uploaded_file.seek(0)
+            PortfolioItem.objects.create(portfolio=portfolio, file=uploaded_file)
+            saved_id = portfolio.id
 
-            ai_data = response.json()
+        # フロントエンドに計算済みの正しいスコアを返す
+        return JsonResponse({
+            'status': 'success',
+            'filename': uploaded_file.name,
+            'raw_text': ai_result_text,
+            'total_score': total_score,  # 👈 90点として返る
+            'saved_portfolio_id': saved_id
+        })
 
-            # --------------------------------------------------
-            # 2. データベースへ保存 (ここを追加！)
-            # --------------------------------------------------
-            # ログイン中のユーザーのみ保存（未ログインなら結果表示のみ）
-            if request.user.is_authenticated and hasattr(request.user, 'student'):
-                
-                # AIの結果テキストを取り出す（PDFの場合とZIPの場合で構造が違うので注意）
-                ai_result_text = ""
-                if 'result' in ai_data:
-                    # PDF単体の場合
-                    ai_result_text = ai_data['result']
-                elif 'files' in ai_data:
-                    # ZIPの場合、最初のファイルの採点結果だけ代表して入れる（または加工する）
-                    ai_result_text = ai_data['files'][0]['result']
-                    ai_result_text += "\n\n(他ファイルの結果は省略されました)"
-
-                # A. ポートフォリオ（表紙）を作成
-                portfolio = Portfolio.objects.create(
-                    student=request.user.student,  # ログイン中の学生
-                    title=f"AI自動採点: {uploaded_file.name}",
-                    description=ai_result_text,    # ★ここ説明文にAIの結果を保存
-                    # teacher_comment は空にしておく（後で先生が書くため）
-                )
-
-                # B. ファイル自体を保存（PortfolioItem）
-                # ★重要: requestsで送信したため、ファイルポインタが末尾にあります。
-                # 保存前にもう一度先頭に戻す必要があります。
-                if hasattr(uploaded_file, 'seek'):
-                    uploaded_file.seek(0)
-
-                PortfolioItem.objects.create(
-                    portfolio=portfolio,
-                    file=uploaded_file
-                )
-                
-                # フロントエンドに「保存ID」も返してあげると便利
-                ai_data['saved_portfolio_id'] = portfolio.id
-
-            # --------------------------------------------------
-            # 3. 結果を返す
-            # --------------------------------------------------
-            return JsonResponse(ai_data)
-
-        except Exception as e:
-            print(f"Error: {e}")
-            return JsonResponse({'error': f'システムエラー: {str(e)}'}, status=500)
-
-    return JsonResponse({'error': 'POSTのみ許可'}, status=400)
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'AIサーバーがタイムアウトしました。'}, status=504)
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': f'システムエラー: {str(e)}'}, status=500)
