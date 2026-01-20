@@ -1768,6 +1768,26 @@ header {
   text-decoration: underline;
 }
 /* 管理者・その他 (グレー) */
+.role-admin header,
+.role-admin .header,
+.role-admin .navbar {
+    background-color: #ff0000 !important; /* 鮮やかな赤 */
+    color: #ffffff !important;           /* 文字を白に */
+    border-color: #cc0000 !important;    /* 枠線があれば濃い赤に */
+}
+
+/* 管理者（role-admin）のフッターを赤にする */
+.role-admin footer,
+.role-admin .footer {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+}
+
+/* ヘッダー・フッター内のリンクも白くして読みやすくする */
+.role-admin header a,
+.role-admin footer a {
+    color: #0f0e0e;
+}
 .role-admin .announcement-title a:hover,
 .role-guest .announcement-title a:hover {
   color: #555;
