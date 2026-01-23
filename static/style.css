@@ -2376,3 +2376,50 @@ body.company-application-page .main-container {
 .company-app-box input:focus { border-color: #f4b400; box-shadow: 0 0 6px rgba(244,180,0,0.3); outline: none; }
 .company-app-box button { background-color: #f4b400; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
 .company-app-box button:hover { background-color: #fbc02d; }
+
+/* カード内のロゴエリア（検索・お気に入り一覧用） */
+.company-logo-container {
+    height: 120px;       /* 高さを固定 */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa; /* 画像がない時の背景色 */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.company-logo-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; /* 縦横比を保って収める */
+}
+
+.no-logo-text {
+    color: #ccc;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* 詳細画面のヘッダー用ロゴ */
+.detail-header-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.detail-logo-box {
+    width: 100px;
+    height: 100px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0; /* 画面が狭くなっても潰れないようにする */
+}

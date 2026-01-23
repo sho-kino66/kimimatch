@@ -14,8 +14,17 @@ class Company(models.Model):
     industry = models.CharField(max_length=100, verbose_name="業種")
     description = models.TextField(verbose_name="事業内容")
     
-    # ★ 追加: 企業ホームページURL
+    # 企業ホームページURL
     website_url = models.URLField(verbose_name="企業ホームページ", blank=True, null=True)
+
+    # ★★★ 追加: 企業ロゴ画像 ★★★
+    # upload_to='company_logos/' で、mediaフォルダ内の保存先を指定しています
+    logo = models.ImageField(
+        upload_to='company_logos/', 
+        verbose_name="企業ロゴ", 
+        blank=True, 
+        null=True
+    )
 
     # 企業コード
     code = models.CharField(

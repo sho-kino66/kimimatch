@@ -10,7 +10,6 @@
       {% for fav in favorites %}
         <div class="company-card">
           <div class="card-body">
-            
             <span class="industry-tag">{{ fav.company.industry }}</span>
             
             <h3 class="company-name">{{ fav.company.name }}</h3>
@@ -21,7 +20,7 @@
 
             <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
               
-              <a href="{% url 'companies:detail' fav.company.pk %}" class="btn-card-detail">
+              <a href="{% url 'companies:detail' fav.company.pk %}?source=favorites" class="btn-card-detail">
                 詳細を見る →
               </a>
 

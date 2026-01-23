@@ -201,12 +201,20 @@
     
     <hr>
     
-    {% if request.GET.next %}
-      <a href="{{ request.GET.next }}" class="back-link">← 前の画面に戻る</a>
-    {% else %}
-      <a href="{% url 'companies:list' %}" class="back-link">← 企業一覧に戻る</a>
-    {% endif %}
+    <div class="page-footer" style="margin-top: 30px;">
+      
+      {% if request.GET.source == 'favorites' %}
+        <a href="{% url 'accounts:favorite_list' %}" class="back-link">
+          ← お気に入り一覧に戻る
+        </a>
+      
+      {% else %}
+        <a href="{% url 'companies:list' %}" class="back-link">
+          ← 企業一覧に戻る
+        </a>
+      {% endif %}
 
-  </div>
+    </div>
+    </div>
 </div>
 {% endblock %}

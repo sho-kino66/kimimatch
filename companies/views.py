@@ -1,14 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Company, Scout
-from accounts.views import StudentOrTeacherOnlyMixin, CompanyOnlyMixin
-from accounts.models import FavoriteCompany, Student
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from chat.models import ChatRoom
 from django.db.models import Count, Q
+from django.contrib.auth.models import User
+
+# モデルのインポート
+from .models import Company, Scout
+from accounts.models import FavoriteCompany, Student
+from chat.models import ChatRoom
+
+# Mixinのインポート
+from accounts.views import StudentOrTeacherOnlyMixin, CompanyOnlyMixin
+
+# ユーティリティのインポート
 from core.utils import calculate_match_percentage
+
 
 # 1. 企業一覧ビュー
 class CompanyListView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, ListView):
@@ -47,6 +54,7 @@ class CompanyListView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, ListView):
         context['sort_by'] = self.request.GET.get('sort', 'name')
         return context
 
+
 # 2. 企業詳細ビュー
 class CompanyDetailView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, DetailView):
     model = Company
@@ -69,8 +77,8 @@ class CompanyDetailView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, DetailVie
             
             # 辞書からデータを取り出してテンプレートへ渡す
             context['match_rate'] = match_data['percentage']
-            context['matched_strengths'] = match_data['matched_strengths']   # ★追加
-            context['matched_conditions'] = match_data['matched_conditions'] # ★追加
+            context['matched_strengths'] = match_data['matched_strengths']
+            context['matched_conditions'] = match_data['matched_conditions']
             
             # (A) お気に入り状態をチェック
             is_favorited = FavoriteCompany.objects.filter(student=student, company=company).exists()
@@ -113,7 +121,8 @@ class CompanyDetailView(LoginRequiredMixin, StudentOrTeacherOnlyMixin, DetailVie
             
         return context
 
-# 4. お気に入り追加ビュー
+
+# 3. お気に入り追加ビュー (これが消えていました)
 @login_required
 def add_favorite(request, company_pk):
     if not hasattr(request.user, 'student'):
@@ -125,7 +134,8 @@ def add_favorite(request, company_pk):
     FavoriteCompany.objects.get_or_create(student=student, company=company)
     return redirect('companies:detail', pk=company_pk)
 
-# 5. お気に入り削除ビュー
+
+# 4. お気に入り削除ビュー (修正済み)
 @login_required
 def remove_favorite(request, company_pk):
     if not hasattr(request.user, 'student'):
@@ -134,10 +144,18 @@ def remove_favorite(request, company_pk):
     company = get_object_or_404(Company, pk=company_pk)
     student = request.user.student
     
+    # 削除実行
     FavoriteCompany.objects.filter(student=student, company=company).delete()
+
+    # ★一覧画面から来た場合は一覧へ戻す処理
+    next_url = request.POST.get('next')
+    if next_url:
+        return redirect(next_url)
+    
     return redirect('companies:detail', pk=company_pk)
 
-# スカウト済み学生一覧ビュー
+
+# 5. スカウト済み学生一覧ビュー
 class ScoutedStudentListView(LoginRequiredMixin, CompanyOnlyMixin, ListView):
     model = Scout
     template_name = 'companies/scouted_student_list.html'
@@ -145,10 +163,14 @@ class ScoutedStudentListView(LoginRequiredMixin, CompanyOnlyMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        company = self.request.user.companyrepresentative.company
-        return Scout.objects.filter(company=company).order_by('-created_at')
+        # ユーザーに紐づく企業情報を取得
+        if hasattr(self.request.user, 'companyrepresentative'):
+            company = self.request.user.companyrepresentative.company
+            return Scout.objects.filter(company=company).order_by('-created_at')
+        return Scout.objects.none() # 安全策
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['company_name'] = self.request.user.companyrepresentative.company.name
+        if hasattr(self.request.user, 'companyrepresentative'):
+            context['company_name'] = self.request.user.companyrepresentative.company.name
         return context
