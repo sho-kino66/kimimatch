@@ -37,12 +37,19 @@ class Company(models.Model):
 class Scout(models.Model):
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+    
+    # --- 追加フィールド ---
+    message = models.TextField(verbose_name="スカウトメッセージ", default="あなたのポートフォリオを見てスカウトしました！")
+    is_read = models.BooleanField(default=False, verbose_name="既読フラグ")
+    # --------------------
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('company', 'student')
         verbose_name = "スカウト"
         verbose_name_plural = "スカウト一覧"
+        ordering = ['-created_at'] # 新しい順に並べる
 
     def __str__(self):
         return f"{self.company.name}が{self.student.full_name}をスカウト"

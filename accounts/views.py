@@ -119,10 +119,14 @@ def dashboard(request):
     user = request.user
     user_type = None
     profile = None
+    scouts = [] # 初期化
     
     try:
         profile = user.student
         user_type = 'student'
+        # --- 追加：学生の場合のみ、自分宛のスカウトを最新順で取得 ---
+        scouts = Scout.objects.filter(student=profile).order_by('-created_at')
+        # -------------------------------------------------------
     except Student.DoesNotExist:
         try:
             profile = user.teacher
@@ -137,6 +141,7 @@ def dashboard(request):
                 else:
                     user_type = 'unassigned' 
     
+    # 全体へのお知らせ取得
     announcement_list = Announcement.objects.all().order_by('-created_at')
     paginator = Paginator(announcement_list, 5)
     page_number = request.GET.get('page')
@@ -147,6 +152,7 @@ def dashboard(request):
         'user_type': user_type,
         'profile': profile,
         'announcements': page_obj, 
+        'scouts': scouts, # --- 追加：コンテキストにスカウトを含める ---
     }
     return render(request, 'accounts/dashboard.html', context)
 
@@ -424,13 +430,17 @@ def grade_file(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POSTのみ許可'}, status=400)
 
+    # 1. 変数の初期化（エラー防止のために最初に行う）
+    saved_id = None
+    total_score = 0
+
     try:
         uploaded_file = request.FILES.get('upload')
         if not uploaded_file:
             return JsonResponse({'error': 'ファイルがありません'}, status=400)
 
         # --------------------------------------------------
-        # 1. AIサーバー（Colab）へ送信 (URLは適宜更新してください)
+        # 1. AIサーバー（Colab）へ送信
         # --------------------------------------------------
         external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
         headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
@@ -447,33 +457,32 @@ def grade_file(request):
         ai_result_text = ai_data.get('result', '')
 
         # --------------------------------------------------
-        # 2. スコアの抽出 (ここを大幅修正！)
+        # 2. スコアの抽出（超柔軟版）
         # --------------------------------------------------
-        def get_score(name_list):
-            """
-            日本語と中国語の表記ゆれに対応して数字を抜き出す関数
-            """
+        # [SCORE] または [[SCORE]] から、[END] または [[END]] までを抽出（大文字小文字無視）
+        score_match = re.search(r'\[+SCORE\]+(.*?)\[+END\]+', ai_result_text, re.DOTALL | re.IGNORECASE)
+        score_text = score_match.group(1) if score_match else ai_result_text # 万が一タグがなくても全体から探す
+
+        def get_score(name_list, text):
             for name in name_list:
-                # 「正確性: 25」や「正確性 25」の形式を探す
-                match = re.search(fr'{name}[:：]?\s*(\d+)', ai_result_text)
+                # 項目名の後の最初の「数字」だけを探す（カッコなどは無視）
+                pattern = fr'{name}[^0-9]*(\d+)'
+                match = re.search(pattern, text)
                 if match:
                     return int(match.group(1))
             return 0
 
-        # 各項目を個別に抜き出す (AIが間違えて中国語を混ぜても拾えるように)
-        s1 = get_score(["正確性", "正确性"])
-        s2 = get_score(["可読性", "可读性"])
-        s3 = get_score(["パフォーマンス", "性能"])
-        s4 = get_score(["スタイル", "格式"])
+        # スコア抽出（AIが「精度」や「飾り」と書いてもOKなようにリスト化）
+        s1 = get_score(["正確性", "精度", "Accuracy"], score_text)
+        s2 = get_score(["可読性", "Readability"], score_text)
+        s3 = get_score(["パフォーマンス", "性能", "Performance"], score_text)
+        s4 = get_score(["スタイル", "飾り", "Style"], score_text)
 
-        # 【重要】合計はAIの数値を使わず、ここで計算する！
-        # これにより 25+20+25+20=90 と正しく算出されます
         total_score = s1 + s2 + s3 + s4
 
         # --------------------------------------------------
         # 3. データベースへ保存
         # --------------------------------------------------
-        saved_id = None
         if request.user.is_authenticated:
             student_profile = getattr(request.user, 'student', None)
             
@@ -481,26 +490,28 @@ def grade_file(request):
                 student=student_profile,
                 title=f"AI採点結果: {uploaded_file.name}",
                 description=ai_result_text,
-                # もしPortfolioモデルにscoreフィールドを追加したなら
-                # score=total_score 
             )
 
             uploaded_file.seek(0)
             PortfolioItem.objects.create(portfolio=portfolio, file=uploaded_file)
             saved_id = portfolio.id
 
-        # フロントエンドに計算済みの正しいスコアを返す
+        # 成功レスポンス
         return JsonResponse({
             'status': 'success',
             'filename': uploaded_file.name,
             'raw_text': ai_result_text,
-            'total_score': total_score,  # 👈 90点として返る
-            'saved_portfolio_id': saved_id
+            'total_score': total_score,
+            'accuracy': s1,
+            'readability': s2,
+            'performance': s3,
+            'style': s4,
+            'saved_portfolio_id': saved_id  # 最初で定義しているのでエラーになりません
         })
 
     except requests.exceptions.Timeout:
         return JsonResponse({'error': 'AIサーバーがタイムアウトしました。'}, status=504)
     except Exception as e:
         import traceback
-        print(traceback.format_exc())
+        print(traceback.format_exc()) # サーバーのコンソールに詳細を表示
         return JsonResponse({'error': f'システムエラー: {str(e)}'}, status=500)

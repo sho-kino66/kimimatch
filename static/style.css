@@ -166,6 +166,119 @@ form button[type="submit"] {
 /* === 4. カラーテーマ (ロール別) === */
 
 /* --- 4-1. 学生 (グリーン系) --- */
+/* 検索エリア */
+.role-student .search-container {
+    margin: 20px 0 30px 0;
+}
+.role-student .search-form {
+    display: flex;
+    gap: 10px;
+    max-width: 800px;
+}
+.role-student .search-form input[type="text"] {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #a7f3d0;
+    border-radius: 30px;
+    font-size: 1rem;
+}
+.role-student .search-form input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+.role-student .btn-search {
+    background-color: #15803d;
+    color: #ffffff;
+    border: none;
+    padding: 0 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 並び替えエリア */
+.role-student .sort-options {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+.role-student .sort-link {
+    margin-left: 10px;
+    text-decoration: none;
+    color: #15803d;
+}
+.role-student .sort-link.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* カードグリッド */
+.role-student .company-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+.role-student .company-card {
+    background-color: #ffffff;
+    border: 1px solid #b7e4c7;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.role-student .company-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(21, 128, 61, 0.1);
+}
+
+/* 業界バッジ */
+.role-student .industry-tag {
+    display: inline-block;
+    background-color: #dcfce7;
+    color: #14532d;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+.role-student .company-name {
+    font-size: 1.25rem;
+    color: #14532d;
+    margin: 0 0 15px 0;
+    border-bottom: none; /* 既存のh3の下線を消す */
+}
+
+/* カード内のアクション */
+.role-student .card-footer {
+    border-top: 1px solid #f0fdf4;
+    padding-top: 15px;
+    text-align: right;
+}
+.role-student .btn-card-detail {
+    color: #15803d;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.role-student .btn-card-detail:hover {
+    text-decoration: underline;
+}
+.role-student .btn-card-delete {
+    background: none;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.role-student .btn-card-delete:hover {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+}
 .role-student header {
   background-color: #15803d;
   border-bottom: 1px solid #064e3b;

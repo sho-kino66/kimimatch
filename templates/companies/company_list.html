@@ -1,56 +1,61 @@
 {% extends "base.html" %}
-
 {% block title %}企業を探す{% endblock %}
 
 {% block content %}
-  <h2>企業一覧</h2>
+<div class="page-container">
+  <h2 class="page-title">企業を探す</h2>
   
-  <form method="get" action="{% url 'companies:list' %}">
-    <input type="text" name="query" value="{{ query }}" placeholder="企業名、業種、タグ...">
-    <button type="submit">検索</button>
-  </form>
-  <hr>
+  <div class="search-container">
+    <form method="get" action="{% url 'companies:list' %}" class="search-form">
+      <div class="search-input-group">
+        <input type="text" name="query" value="{{ query }}" placeholder="企業名、業種、タグで検索...">
+        <button type="submit" class="btn-search">検索</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="sort-options">
+    <span class="sort-label">並び替え:</span>
+    <a href="?sort=name&query={{ query }}" class="sort-link {% if sort_by == 'name' %}active{% endif %}">
+      企業名 {% if sort_by == 'name' %}▼{% endif %}
+    </a>
+    <a href="?sort=industry&query={{ query }}" class="sort-link {% if sort_by == 'industry' %}active{% endif %}">
+      業種 {% if sort_by == 'industry' %}▼{% endif %}
+    </a>
+  </div>
+
+  <hr class="divider">
 
   {% if companies %}
-    <table border="1" cellpadding="5">
-      <thead>
-        <tr>
-          <th>
-            <a href="?sort=name&query={{ query }}">
-              企業名
-              {% if sort_by == 'name' %}▼{% endif %}
-            </a>
-          </th>
-          <th>
-            <a href="?sort=industry&query={{ query }}">
-              業種
-              {% if sort_by == 'industry' %}▼{% endif %}
-            </a>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for company in companies %}
-          <tr>
-            <td>
-              <a href="{% url 'companies:detail' company.pk %}">
-                {{ company.name }}
+    <div class="company-grid">
+      {% for company in companies %}
+        <div class="company-card">
+          <div class="card-body">
+            <span class="industry-tag">{{ company.industry }}</span>
+            <h3 class="company-name">{{ company.name }}</h3>
+            
+            <div class="card-footer">
+              <a href="{% url 'companies:detail' company.pk %}" class="btn-detail">
+                詳細を見る <span>→</span>
               </a>
-            </td>
-            <td>{{ company.industry }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
     
-    {% else %}
-    {% if query %}
-      <p>「{{ query }}」に一致する企業は見つかりませんでした。</p>
-    {% else %}
-      <p>企業はまだ登録されていません。</p>
-    {% endif %}
+  {% else %}
+    <div class="no-result">
+      {% if query %}
+        <p>「<strong>{{ query }}</strong>」に一致する企業は見つかりませんでした。</p>
+      {% else %}
+        <p>企業はまだ登録されていません。</p>
+      {% endif %}
+    </div>
   {% endif %}
   
-  <hr>
-  <p><a href="{% url 'accounts:dashboard' %}">メインメニューに戻る</a></p>
+  <div class="page-footer">
+    <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
+  </div>
+</div>
 {% endblock %}

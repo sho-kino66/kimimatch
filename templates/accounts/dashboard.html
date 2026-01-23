@@ -5,8 +5,33 @@
 <div class="page-container">
   <div class="profile-card">
     
-    <h2>お知らせ</h2>
+    <h2>お知らせ・スカウト</h2>
 
+    {# --- 1. スカウト情報の表示 (学生本人の場合のみ) --- #}
+    {% if scouts %}
+      <ul class="announcement-list" style="margin-bottom: 2rem;">
+        {% for scout in scouts %}
+          <li class="announcement-item" style="border-left: 5px solid #007bff; background: #f0f7ff; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+            <span class="announcement-date" style="color: #007bff; font-weight: bold;">
+               スカウト届出：{{ scout.created_at|date:"Y年m月d日" }}
+            </span>
+            <div class="announcement-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+              <span><strong>{{ scout.company.name }}</strong> からスカウトが届いています！</span>
+              
+              {# --- 企業詳細ボタン --- #}
+            <a href="{% url 'companies:detail' scout.company.pk %}" 
+              class="btn-primary" 
+              style="background: #007bff; color: white; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;">
+                企業詳細を見る
+            </a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+      <hr style="border: 0.5px solid #eee; margin-bottom: 2rem;">
+    {% endif %}
+
+    {# --- 2. 通常のお知らせ表示 (既存のコード) --- #}
     {% if announcements %}
       <ul class="announcement-list">
         {% for item in announcements %}
@@ -21,6 +46,7 @@
         {% endfor %}
       </ul>
 
+      {# --- ページネーション (既存のコード) --- #}
       <div class="pagination">
         <span class="step-links">
             {% if announcements.has_previous %}
@@ -38,7 +64,9 @@
             {% endif %}
         </span>
       </div>
-      {% else %}
+    {% endif %}
+
+    {% if not announcements and not scouts %}
       <div class="no-announcement">
         <p>現在、新しいお知らせはありません。</p>
       </div>
