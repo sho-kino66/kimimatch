@@ -1,7 +1,4 @@
-import re
-import json
 import traceback
-import requests # ← 外部と通信するためのライブラリ
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, FormView
@@ -11,18 +8,15 @@ from .models import Student, Teacher, CompanyRepresentative, FavoriteCompany
 from .forms import (
     StudentSignUpForm, TeacherSignUpForm, CompanyRepresentativeSignUpForm,
     TeacherCommentForm,
-    # ★ StudentProfileUpdateForm は不要になったので削除し、新しく3つのフォームを追加
     StudentProfileForm, TeacherProfileForm, CompanyRepresentativeProfileForm,
     StudentTagUpdateForm, CompanyTagUpdateForm)
 from companies.models import Company, Scout
 from chat.models import ChatRoom
 from django.db.models import Q, Count
-from portfolios.models import Portfolio,PortfolioItem
+from portfolios.models import Portfolio, PortfolioItem
 from core.models import Announcement
 from django.core.paginator import Paginator
 from core.utils import calculate_match_percentage
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 # ==================================
 # 1. 新規登録（サインアップ）関連
@@ -119,14 +113,13 @@ def dashboard(request):
     user = request.user
     user_type = None
     profile = None
-    scouts = [] # 初期化
+    scouts = [] 
     
+    # ユーザータイプとプロフィールの取得
     try:
         profile = user.student
         user_type = 'student'
-        # --- 追加：学生の場合のみ、自分宛のスカウトを最新順で取得 ---
         scouts = Scout.objects.filter(student=profile).order_by('-created_at')
-        # -------------------------------------------------------
     except Student.DoesNotExist:
         try:
             profile = user.teacher
@@ -141,21 +134,23 @@ def dashboard(request):
                 else:
                     user_type = 'unassigned' 
     
-    # 全体へのお知らせ取得
+    # お知らせ取得（ページネーション付き）
     announcement_list = Announcement.objects.all().order_by('-created_at')
     paginator = Paginator(announcement_list, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # ★ ここで context を定義します
     context = {
         'username': user.username,
         'user_type': user_type,
         'profile': profile,
         'announcements': page_obj, 
-        'scouts': scouts, # --- 追加：コンテキストにスカウトを含める ---
+        'scouts': scouts,
     }
+    
+    # 最後に context を渡して表示
     return render(request, 'accounts/dashboard.html', context)
-
 @login_required
 def my_page(request):
     user = request.user
@@ -192,7 +187,6 @@ def my_page(request):
     if user_type == 'student':
         context['portfolios'] = portfolios
     return render(request, template_name, context)
-
 # ==================================
 # 4. 閲覧・操作ビュー
 # ==================================
@@ -424,94 +418,3 @@ class CompanyTagUpdateView(LoginRequiredMixin, CompanyOnlyMixin, FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
-
-@csrf_exempt
-def grade_file(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POSTのみ許可'}, status=400)
-
-    # 1. 変数の初期化（エラー防止のために最初に行う）
-    saved_id = None
-    total_score = 0
-
-    try:
-        uploaded_file = request.FILES.get('upload')
-        if not uploaded_file:
-            return JsonResponse({'error': 'ファイルがありません'}, status=400)
-
-        # --------------------------------------------------
-        # 1. AIサーバー（Colab）へ送信
-        # --------------------------------------------------
-        external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
-        headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
-
-        uploaded_file.seek(0)
-        files = {'upload': (uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)}
-        
-        response = requests.post(external_ai_url, files=files, headers=headers, timeout=180, verify=False)
-
-        if response.status_code != 200:
-            return JsonResponse({'error': f'AIサーバーエラー: {response.status_code}'}, status=502)
-
-        ai_data = response.json()
-        ai_result_text = ai_data.get('result', '')
-
-        # --------------------------------------------------
-        # 2. スコアの抽出（超柔軟版）
-        # --------------------------------------------------
-        # [SCORE] または [[SCORE]] から、[END] または [[END]] までを抽出（大文字小文字無視）
-        score_match = re.search(r'\[+SCORE\]+(.*?)\[+END\]+', ai_result_text, re.DOTALL | re.IGNORECASE)
-        score_text = score_match.group(1) if score_match else ai_result_text # 万が一タグがなくても全体から探す
-
-        def get_score(name_list, text):
-            for name in name_list:
-                # 項目名の後の最初の「数字」だけを探す（カッコなどは無視）
-                pattern = fr'{name}[^0-9]*(\d+)'
-                match = re.search(pattern, text)
-                if match:
-                    return int(match.group(1))
-            return 0
-
-        # スコア抽出（AIが「精度」や「飾り」と書いてもOKなようにリスト化）
-        s1 = get_score(["正確性", "精度", "Accuracy"], score_text)
-        s2 = get_score(["可読性", "Readability"], score_text)
-        s3 = get_score(["パフォーマンス", "性能", "Performance"], score_text)
-        s4 = get_score(["スタイル", "飾り", "Style"], score_text)
-
-        total_score = s1 + s2 + s3 + s4
-
-        # --------------------------------------------------
-        # 3. データベースへ保存
-        # --------------------------------------------------
-        if request.user.is_authenticated:
-            student_profile = getattr(request.user, 'student', None)
-            
-            portfolio = Portfolio.objects.create(
-                student=student_profile,
-                title=f"AI採点結果: {uploaded_file.name}",
-                description=ai_result_text,
-            )
-
-            uploaded_file.seek(0)
-            PortfolioItem.objects.create(portfolio=portfolio, file=uploaded_file)
-            saved_id = portfolio.id
-
-        # 成功レスポンス
-        return JsonResponse({
-            'status': 'success',
-            'filename': uploaded_file.name,
-            'raw_text': ai_result_text,
-            'total_score': total_score,
-            'accuracy': s1,
-            'readability': s2,
-            'performance': s3,
-            'style': s4,
-            'saved_portfolio_id': saved_id  # 最初で定義しているのでエラーになりません
-        })
-
-    except requests.exceptions.Timeout:
-        return JsonResponse({'error': 'AIサーバーがタイムアウトしました。'}, status=504)
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc()) # サーバーのコンソールに詳細を表示
-        return JsonResponse({'error': f'システムエラー: {str(e)}'}, status=500)

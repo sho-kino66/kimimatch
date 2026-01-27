@@ -1,3 +1,8 @@
+import re
+import requests
+import traceback
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
@@ -171,3 +176,123 @@ class PortfolioCommentUpdateView(LoginRequiredMixin, TeacherOnlyMixin, UpdateVie
         # (self.object は編集された Portfolio インスタンス)
         student_pk = self.object.student.pk
         return reverse_lazy('accounts:student_detail', kwargs={'pk': student_pk})
+
+# portfolios/views.py
+
+# --- 共通のAI採点処理（関数として独立させる） ---
+def _run_ai_grading(item):
+    import re, requests
+    
+    uploaded_file = item.file 
+    external_ai_url = "[https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/](https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/)"
+    headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
+
+    try:
+        with uploaded_file.open('rb') as f:
+            files = {'upload': (uploaded_file.name, f.read(), 'application/octet-stream')}
+            response = requests.post(external_ai_url, files=files, headers=headers, timeout=180, verify=False)
+        
+        if response.status_code == 200:
+            ai_data = response.json()
+            raw_text = ai_data.get('result', '')
+
+            # --- 1. スコア抽出：複数ファイルがあっても確実に拾う ---
+            def extract_score_robust(keywords, text):
+                # まず、全体から「キーワード: 数字/25」の形を優先して探す
+                for key in keywords:
+                    pattern = fr'{key}[^0-9\n]*?(\d+)\s*/\s*25'
+                    match = re.search(pattern, text, re.IGNORECASE)
+                    if match:
+                        return int(match.group(1))
+                
+                # 見つからない場合はセクション分割で探す
+                sections = re.split(r'#+', text)
+                for section in sections:
+                    if any(key in section for key in keywords):
+                        match = re.search(r'(\d+)', section)
+                        if match:
+                            return min(int(match.group(1)), 25)
+                return 0
+
+            s1 = extract_score_robust(["正確性", "准确性", "Accuracy"], raw_text)
+            s2 = extract_score_robust(["可読性", "Readability", "読みやすさ"], raw_text)
+            s3 = extract_score_robust(["パフォーマンス", "性能", "Performance"], raw_text)
+            s4 = extract_score_robust(["スタイル", "飾り", "Style", "規約"], raw_text)
+            
+            total_score = s1 + s2 + s3 + s4
+
+            # --- 2. フィードバックのクリーニング：ZIP対応の安全な切り出し ---
+            # システムタグの除去
+            clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
+            
+            # 【重要】以前の「```python」での一律カットを廃止
+            # 代わりに、明らかに「ソースコード一式の転記」が始まる目印だけを探す
+            cutoff_markers = [
+                r'【採点対象コード】',
+                r'## 採点対象ソースコード',
+                r'## ソースコード全文',
+                r'以下は採点対象のソースコードです'
+            ]
+            
+            for marker in cutoff_markers:
+                parts = re.split(marker, clean_text)
+                if len(parts) > 1:
+                    clean_text = parts[0]
+                    break
+            
+            # --- 3. 最終チェック：詳細が短すぎないか ---
+            # もしクリーニングの結果が短すぎたら、安全策として全文（タグ抜き）を採用
+            if len(clean_text) < 50:
+                clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
+
+            # 保存
+            item.ai_score = total_score
+            item.ai_feedback = clean_text.strip()
+            item.save()
+            return True
+            
+    except Exception as e:
+        print(f"AI Grading Error: {e}")
+        
+    return False
+
+# アップロード処理を修正
+@login_required
+def add_portfolio_item(request, portfolio_pk):
+    portfolio = get_object_or_404(Portfolio, pk=portfolio_pk)
+    if request.method == 'POST':
+        form = PortfolioItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.portfolio = portfolio
+            item.save()
+            
+            # ★ 作成したばかりの「item」を採点に回す
+            _run_ai_grading(item)
+            
+    return redirect('portfolios:detail', pk=portfolio_pk)
+
+# --- 個別採点ボタン用（再採点したい時のために残す） ---
+@csrf_exempt
+@login_required
+def grade_portfolio_ai(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk)
+    if _run_ai_grading(portfolio):
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error', 'error': '採点に失敗しました'})
+
+class PortfolioItemDeleteView(LoginRequiredMixin, PortfolioItemOwnerOnlyMixin, DeleteView):
+    model = PortfolioItem
+    template_name = 'portfolios/portfolio_item_confirm_delete.html'
+    context_object_name = 'item'
+
+    def get_success_url(self):
+        portfolio = self.object.portfolio
+        
+        # アイテム（ファイル）を削除した後、他にアイテムが1つも残っていなければAI結果を消す
+        if portfolio.items.count() == 1: # 削除される「前」のカウントなので 1 の時にリセット
+            portfolio.ai_score = None
+            portfolio.ai_feedback = None
+            portfolio.save()
+            
+        return reverse_lazy('portfolios:detail', kwargs={'pk': portfolio.pk})

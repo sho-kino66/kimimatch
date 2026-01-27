@@ -24,4 +24,6 @@ urlpatterns = [
 
     # <int:pk> は「コメントを編集したいポートフォリオ(Portfolio)のID」
     path('portfolio/<int:pk>/comment/', views.PortfolioCommentUpdateView.as_view(), name='portfolio_comment_update'),
+
+    path('<int:pk>/grade_ai/', views.grade_portfolio_ai, name='grade_ai'),
 ]

@@ -37,7 +37,7 @@
           プロフィールを編集
         </a>
         <a href="{% url 'accounts:student_tag_update' %}" class="btn btn-detail" style="margin-left: 10px;">
-           マッチングタグ設定
+            マッチングタグ設定
         </a>
       </div>
 
@@ -57,6 +57,10 @@
 
       <h3>マイ・ポートフォリオ管理</h3>
       
+      <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+        ※ 作品のアップロードとAI採点は、各ポートフォリオの「作品管理」から行えます。
+      </p>
+
       <a href="{% url 'portfolios:create' %}" class="btn-create">
         ＋ 新しいポートフォリオを作成
       </a>
@@ -77,7 +81,7 @@
                 <td>{{ portfolio.description | truncatewords:15 }}</td>
                 <td>
                   <a href="{% url 'portfolios:detail' portfolio.pk %}" class="btn btn-detail">
-                    作品管理
+                    作品管理・AI採点
                   </a>
                   <a href="{% url 'portfolios:update' portfolio.pk %}?next={% url 'accounts:my_page' %}" class="btn btn-edit">
                     編集
@@ -94,177 +98,7 @@
         <p>まだポートフォリオが作成されていません。</p>
       {% endif %}
 
-      <hr>
-
-      <!-- ======================= -->
-    <!-- ✅ ここからコード採点 -->
-    <!-- ======================= -->
- 
-    <h3>コード採点</h3>
- 
-    <style>
-      #loading-spinner {
-        display: none;
-        width: 16px;
-        height: 16px;
-        border: 3px solid #ccc;
-        border-top: 3px solid #333;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        vertical-align: middle;
-        margin-left: 8px;
-      }
- 
-      @keyframes spin {
-        100% { transform: rotate(360deg); }
-      }
- 
-      .score-box {
-        background: #f7f7ff;
-        border-radius: 10px;
-        padding: 15px;
-        margin-top: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      }
- 
-      .score-box h4 {
-        margin-bottom: 10px;
-      }
- 
-      .preview-box {
-        margin-top: 10px;
-        background: #1e1e1e; /* コードエディタっぽい色に */
-        color: #0f0;      /* 文字色を少し見やすく */
-        padding: 15px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* 等幅フォント */
-        line-height: 1.5;
-        max-height: 400px;   /* 少し広げる */
-        overflow: auto;
-        white-space: pre-wrap; /* 改行を維持 */
-        border: 1px solid #333;
-      }
-    </style>
- 
-    <!-- スピナー -->
-    <div id="loading-spinner"></div>
- 
-    <!-- PDF または ZIP -->
-    <input type="file" id="file-input" accept=".pdf,.zip">
- 
-    <!-- 採点ボタン -->
-    <button id="grade-btn" class="btn btn-detail" style="margin-top: 10px;">
-      ファイルを採点する
-    </button>
- 
-    <!-- 結果表示 -->
-    <div id="result"></div>
- 
-    <script>
-document.getElementById("grade-btn").addEventListener("click", async () => {
-    const file = document.getElementById("file-input").files[0];
-    const spinner = document.getElementById("loading-spinner");
-    const resultDiv = document.getElementById("result");
-
-    if (!file) {
-        alert("ファイルを選択してください");
-        return;
-    }
-
-    spinner.style.display = "inline-block";
-    resultDiv.innerHTML = "";
-
-    const formData = new FormData();
-    formData.append("upload", file);
-
-    try {
-        const response = await fetch("/grade_file/", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-        console.log("デバッグ用受信データ:", data);
-
-        if (data.error || data.status !== 'success') {
-            resultDiv.innerText = "エラー: " + (data.error || "採点に失敗しました");
-            return;
-        }
-
-        const rawText = data.raw_text || "";
-        const serverTotal = data.total_score || "-";
-
-        // --- AI特有の表記ゆれに対応した抽出関数 ---
-        const extract = (keywords) => {
-            for (const key of keywords) {
-                // キーワードの後に続く最初の数字（評価: 25/25 の 25 など）を探す
-                const regex = new RegExp(`${key}[^0-9]*(\\d+)`);
-                const match = rawText.match(regex);
-                if (match) return match[1];
-            }
-            return "-";
-        };
-
-        // 各項目の点数を抽出
-        const scores = {
-            accuracy:    extract(["正確性", "精确性", "Accuracy"]),
-            readability: extract(["可読性", "可读性", "Readability"]),
-            performance: extract(["パフォーマンス", "性能", "Performance"]),
-            style:       extract(["スタイル", "格式", "Style", "規約"])
-        };
-
-        // --- HTML表示の組み立て ---
-        const escapeHtml = (str) => str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])) : "";
-
-        resultDiv.innerHTML = `
-            <div class="score-box" style="border-left: 5px solid #4a90e2; padding-left: 20px;">
-                <h4 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    ✅ 採点完了: ${data.filename || "ファイル"} (ID: ${data.saved_portfolio_id})
-                </h4>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
-                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                        正確性: <span style="font-size: 1.2em; color: #d9534f; font-weight: bold;">${scores.accuracy}</span> / 25
-                    </div>
-                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                        可読性: <span style="font-size: 1.2em; color: #5bc0de; font-weight: bold;">${scores.readability}</span> / 25
-                    </div>
-                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                        性能: <span style="font-size: 1.2em; color: #f0ad4e; font-weight: bold;">${scores.performance}</span> / 25
-                    </div>
-                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                        スタイル: <span style="font-size: 1.2em; color: #5cb85c; font-weight: bold;">${scores.style}</span> / 25
-                    </div>
-                </div>
-
-                <div style="text-align: right; margin-top: 10px; padding: 10px; background: #333; color: #fff; border-radius: 8px;">
-                    <span style="font-size: 1.1em;">総合スコア:</span> 
-                    <span style="font-size: 1.8em; font-weight: bold; color: #00ff00;">${serverTotal}</span> / 100
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <strong style="display: block; margin-bottom: 8px; color: #555;">🤖 AI詳細レポート</strong>
-                    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ccc; white-space: pre-wrap; font-size: 0.9em; line-height: 1.6; color: #333; max-height: 400px; overflow-y: auto;">${escapeHtml(rawText)}</div>
-                </div>
-            </div>
-        `;
-
-    } catch (err) {
-        console.error("JavaScript Error:", err);
-        resultDiv.innerText = "エラーが発生しました。コンソールを確認してください。";
-    } finally {
-        spinner.style.display = "none";
-    }
-});
-    </script>
- 
-    <!-- ======================= -->
-    <!-- ✅ 採点ここまで -->
-    <!-- ======================= -->
-
-
-      {% elif user_type == 'teacher' %}
+    {% elif user_type == 'teacher' %}
       <h3>教員情報</h3>
       <div class="info-table">
         <table>
@@ -293,9 +127,6 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
         </a>
       </div>
 
-    {# ======================= #}
-    {#      企業担当者の場合     #}
-    {# ======================= #}
     {% elif user_type == 'company' %}
       
       <h3>担当者情報</h3>
@@ -367,15 +198,12 @@ document.getElementById("grade-btn").addEventListener("click", async () => {
       </div>
 
       <div style="text-align: right; margin-top: 15px;">
-        
         <a href="{% url 'accounts:profile_update' %}" class="btn btn-edit">
           担当者プロフィールを編集
         </a>
-
         <a href="{% url 'accounts:company_tag_update' %}" class="btn btn-edit" style="margin-left: 10px; color: #d9a900; border: none;">
-           マッチングタグ設定
+            マッチングタグ設定
         </a>
-
       </div>
       
     {% endif %}

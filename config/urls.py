@@ -28,7 +28,6 @@ urlpatterns = [
     # お知らせやトップページは core アプリが担当
     # 空文字 '' にすることで、ルートURL（http://127.0.0.1:8000/）へのアクセスも core.urls で処理します
     path('', include('core.urls')), 
-    path('grade_file/', account_views.grade_file, name='grade_file'),
 ]
 
 # (開発環境でのみ、メディアファイルを提供するための設定)

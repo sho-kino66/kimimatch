@@ -23,7 +23,6 @@
         {% if matched_strengths or matched_conditions %}
           <hr style="border-top: 1px dashed #ffcccc; margin: 15px 0;">
           <div style="text-align: left; font-size: 0.95rem;">
-            
             {% if matched_strengths %}
               <div style="margin-bottom: 8px;">
                 <strong style="color: #e53e3e;">⚡ マッチしたスキル・強み:</strong><br>
@@ -45,16 +44,13 @@
                 {% endfor %}
               </div>
             {% endif %}
-            
           </div>
         {% endif %}
       </div>
     {% endif %}
 
-
     {% if user.companyrepresentative %} 
       <div class="action-box">
-        
         {% if is_scouted %}
           <form action="{% url 'accounts:remove_scout' student.pk %}" method="post">
             {% csrf_token %}
@@ -74,7 +70,6 @@
         {% else %}
           <a href="{% url 'chat:start_chat' student.user.id %}?next={{ student_detail_url }}" class="btn-chat">この学生とチャットを開始する</a>
         {% endif %}
-
       </div>
     {% endif %}
 
@@ -106,9 +101,7 @@
         <p style="white-space: pre-wrap;">{{ student.comment }}</p>
         
         {% if user.teacher and user.teacher.school == student.school %}
-          <a href="{% url 'accounts:student_comment_update' student.pk %}" 
-             class="comment-edit-link" 
-             style="background-color: #dbeafe; padding: 4px 8px; border-radius: 5px;">
+          <a href="{% url 'accounts:student_comment_update' student.pk %}" class="comment-edit-link" style="background-color: #dbeafe; padding: 4px 8px; border-radius: 5px;">
             [このコメントを編集する]
           </a>
         {% endif %}
@@ -116,85 +109,84 @@
     {% else %}
       {% if user.teacher and user.teacher.school == student.school %}
         <div class="teacher-comment-general" style="background-color: #f9f9f9;">
-          <a href="{% url 'accounts:student_comment_update' student.pk %}" 
-             class="comment-edit-link"
-             style="font-weight: 600;">
+          <a href="{% url 'accounts:student_comment_update' student.pk %}" class="comment-edit-link" style="font-weight: 600;">
             [担当教員コメントを追加する]
           </a>
         </div>
       {% endif %}
     {% endif %}
-    
-    {% if user.companyrepresentative and school_teachers %}
-    <div class="teacher-chat-box">
-      <h4>
-        {{ student.school.name }} の担当教員
-        <span>（学生に関する質問はこちらへ）</span>
-      </h4>
-      <ul>
-        {% for teacher in school_teachers %}
-          <li>
-            {{ teacher.full_name }} 先生
-            <a href="{% url 'chat:start_chat' teacher.user.id %}?next={{ student_detail_url }}">
-              チャット
-            </a>
-          </li>
-        {% empty %}
-          <li>（まだ担当教員が登録されていません）</li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-    
 
     <hr>
     <h3>ポートフォリオ一覧</h3>
     
     {% if portfolios %}
       {% for portfolio in portfolios %}
-        <div class="portfolio-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
-          <h4>{{ portfolio.title }}</h4>
-          <p>{{ portfolio.description | linebreaksbr }}</p>
+        <div class="portfolio-card" style="border: 1px solid #ccc; border-radius: 12px; padding: 20px; margin-bottom: 25px; background: #fff;">
+          <h4 style="margin-top: 0; color: #2c3e50; font-size: 1.25rem;">{{ portfolio.title }}</h4>
+          <p style="color: #555;">{{ portfolio.description | linebreaksbr }}</p>
           
           {% if portfolio.teacher_comment %}
-            <div class="teacher-comment-portfolio">
-              <strong>
+            <div class="teacher-comment-portfolio" style="background-color: #f8f9fa; border-left: 4px solid #6c757d; padding: 12px; margin: 15px 0;">
+              <strong style="font-size: 0.9rem;">
                 教員コメント
                 {% if portfolio.commenting_teacher %}
                 <span>({{ portfolio.commenting_teacher.full_name }} 先生)</span>
                 {% endif %}
               </strong>
-              <p>{{ portfolio.teacher_comment }}</p>
+              <p style="margin: 5px 0 0; font-size: 0.95rem;">{{ portfolio.teacher_comment }}</p>
             </div>
           {% endif %}
 
           {% if user.teacher and user.teacher.school == student.school %}
-            <a href="{% url 'portfolios:portfolio_comment_update' portfolio.pk %}" class="comment-edit-link">
-              この作品にコメントする
+            <a href="{% url 'portfolios:portfolio_comment_update' portfolio.pk %}" class="comment-edit-link" style="font-size: 0.9rem; text-decoration: underline;">
+              このポートフォリオに教員コメントをする
             </a>
           {% endif %}
 
-          <h5 style="margin-top: 15px;">成果物</h5>
+          <h5 style="margin-top: 25px; border-bottom: 1px solid #eee; padding-bottom: 8px;">成果物とAI解析結果</h5>
           {% if portfolio.items.all %}
-            <ul style="list-style-type: none; padding-left: 0;">
+            <div style="display: grid; gap: 15px; margin-top: 15px;">
               {% for item in portfolio.items.all %}
-                <li style="background: #f4f4f4; border: 1px solid #eee; padding: 8px; margin-bottom: 5px;">
-                  <a href="{{ item.file.url }}" target="_blank">
-                    {{ item.file.name }}
-                  </a>
-                </li>
+                <div style="border: 1px solid #eee; border-radius: 10px; padding: 15px; background: #fdfdfd;">
+                  <div style="margin-bottom: 10px;">
+                    <a href="{{ item.file.url }}" target="_blank" style="font-weight: bold; color: #007bff; text-decoration: none;">
+                      📄 {{ item.file.name }}
+                    </a>
+                  </div>
+
+                  {% if item.ai_score is not None %}
+                    <div style="background-color: #f0fdf4; border: 1px solid #b7e4c7; border-radius: 8px; padding: 12px;">
+                      <div style="margin-bottom: 8px; display: flex; align-items: baseline; gap: 8px;">
+                        <span style="font-size: 0.85rem; font-weight: bold; color: #14532d;">🤖 AI評価:</span>
+                        <span style="font-size: 1.4rem; font-weight: bold; color: #16a34a;">{{ item.ai_score }}</span>
+                        <span style="font-size: 0.9rem; color: #16a34a; font-weight: bold;">/ 100</span>
+                      </div>
+
+                      <details>
+                        <summary style="cursor: pointer; font-size: 0.85rem; color: #15803d; text-decoration: underline; outline: none; list-style: none;">
+                          AIの詳しい分析レポートを表示する ▼
+                        </summary>
+                        <div style="margin-top: 10px; padding: 12px; background: white; border-radius: 6px; font-size: 0.9rem; border: 1px solid #dcfce7; max-height: 300px; overflow-y: auto; line-height: 1.6; color: #333;">
+                          {{ item.ai_feedback|linebreaksbr }}
+                        </div>
+                      </details>
+                    </div>
+                  {% else %}
+                    <p style="font-size: 0.85rem; color: #999; margin: 0;">（AI解析が行われていない、または対象外のファイルです）</p>
+                  {% endif %}
+                </div>
               {% endfor %}
-            </ul>
+            </div>
           {% else %}
-            <p>（このポートフォリオに成果物はありません）</p>
+            <p style="color: #999; font-size: 0.9rem;">（このポートフォリオに成果物はありません）</p>
           {% endif %}
         </div>
       {% endfor %}
     {% else %}
-      <p>（この学生はまだポートフォリオを作成していません）</p>
+      <p style="color: #666; padding: 20px;">（この学生はまだポートフォリオを作成していません）</p>
     {% endif %}
 
-    <hr>
+    <hr style="margin: 30px 0;">
     
     {% if user.teacher %}
       <a href="{% url 'accounts:teacher_student_list' %}" class="back-link">← 担当学生一覧に戻る</a>
@@ -204,4 +196,14 @@
 
   </div>
 </div>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .portfolio-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s ease;
+  }
+</style>
 {% endblock %}
