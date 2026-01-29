@@ -2423,3 +2423,99 @@ body.company-application-page .main-container {
     overflow: hidden;
     flex-shrink: 0; /* 画面が狭くなっても潰れないようにする */
 }
+
+/* --- 共通カード型レイアウト (kimimatch) --- */
+
+/* グリッドコンテナ: カードを横に並べる */
+.company-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* カード本体 */
+.company-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+/* ホバー時の挙動 */
+.company-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 業種バッジ */
+.industry-tag {
+    display: inline-block;
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+    align-self: flex-start;
+}
+
+/* 企業名 */
+.company-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.btn-detail {
+    display: block;
+    text-align: center;
+    background-color: #ffffff;    /* ★ 背景を白に */
+    color: #2563eb;              /* ★ 文字色を青に */
+    border: 1px solid #2563eb;   /* ★ 青い枠線を追加して視認性を確保 */
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: auto;
+    transition: all 0.2s ease;
+}
+/* ホバー時の挙動（マウスを乗せた時に色を反転させる） */
+.btn-detail:hover {
+    background-color: #2563eb;    /* 背景を青に */
+    color: #ffffff;              /* 文字を白に */
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); /* ほんのり青い影 */
+}
+
+/* フッターエリア全体の調整 */
+.page-footer {
+    margin-top: 60px;       /* カードとの重なりを防ぐための大きな余白 */
+    margin-bottom: 40px;
+    text-align: left;       /* ★ 中央から左寄せに変更 */
+    padding-left: 20px;     /* ★ 画面の端にピッタリくっつかないよう少し余白を空ける */
+    clear: both;            /* 他の要素との干渉を確実に防ぐ */
+}
+
+/* 戻るリンクのデザイン */
+.back-link {
+    display: inline-block;
+    color: #64748b;
+    text-decoration: none;
+    padding: 10px 15px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+/* ホバー時の挙動 */
+.back-link:hover {
+    color: #1e293b;
+    transform: translateX(-5px); /* 少し左に動く演出で「戻る」感を強調 */
+}

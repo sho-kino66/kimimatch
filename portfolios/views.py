@@ -179,33 +179,61 @@ class PortfolioCommentUpdateView(LoginRequiredMixin, TeacherOnlyMixin, UpdateVie
 
 # portfolios/views.py
 
-# --- 共通のAI採点処理（関数として独立させる） ---
 def _run_ai_grading(item):
-    import re, requests
+    import re, requests, zipfile, io
     
     uploaded_file = item.file 
-    external_ai_url = "[https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/](https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/)"
+    external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
     headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
 
+    # --- 修正の要：ZIPファイルをテキストとして展開する ---
+    combined_code = ""
+    file_content_for_ai = b""
+    
     try:
-        with uploaded_file.open('rb') as f:
-            files = {'upload': (uploaded_file.name, f.read(), 'application/octet-stream')}
-            response = requests.post(external_ai_url, files=files, headers=headers, timeout=180, verify=False)
+        if uploaded_file.name.endswith('.zip'):
+            with zipfile.ZipFile(uploaded_file) as z:
+                for filename in z.namelist():
+                    # 不要なファイル（Macのシステムファイルやフォルダ）を除外
+                    if filename.startswith('__MACOSX') or filename.endswith('/'):
+                        continue
+                    
+                    # 採点対象の拡張子を指定
+                    if filename.endswith(('.py', '.html', '.c', '.md', '.css', '.js')):
+                        with z.open(filename) as f:
+                            try:
+                                content = f.read().decode('utf-8')
+                                combined_code += f"\n\n--- File: {filename} ---\n{content}"
+                            except UnicodeDecodeError:
+                                # 日本語コメントなどでエラーが出る場合はignoreで対応
+                                content = f.read().decode('utf-8', errors='ignore')
+                                combined_code += f"\n\n--- File: {filename} ---\n{content}"
+            
+            # 結合したテキストを「ファイルデータ」としてAIに送る準備
+            file_content_for_ai = combined_code.encode('utf-8')
+            target_filename = "combined_project.txt"
+        else:
+            # ZIPでない場合は通常通り読み込み
+            with uploaded_file.open('rb') as f:
+                file_content_for_ai = f.read()
+            target_filename = uploaded_file.name
+
+        # --- AIサーバーへの送信 ---
+        files = {'upload': (target_filename, file_content_for_ai, 'text/plain')}
+        response = requests.post(external_ai_url, files=files, headers=headers, timeout=180)
         
         if response.status_code == 200:
             ai_data = response.json()
             raw_text = ai_data.get('result', '')
 
-            # --- 1. スコア抽出：複数ファイルがあっても確実に拾う ---
+            # --- スコア抽出：以前のロジックを維持 ---
             def extract_score_robust(keywords, text):
-                # まず、全体から「キーワード: 数字/25」の形を優先して探す
                 for key in keywords:
                     pattern = fr'{key}[^0-9\n]*?(\d+)\s*/\s*25'
                     match = re.search(pattern, text, re.IGNORECASE)
                     if match:
                         return int(match.group(1))
                 
-                # 見つからない場合はセクション分割で探す
                 sections = re.split(r'#+', text)
                 for section in sections:
                     if any(key in section for key in keywords):
@@ -214,19 +242,17 @@ def _run_ai_grading(item):
                             return min(int(match.group(1)), 25)
                 return 0
 
-            s1 = extract_score_robust(["正確性", "准确性", "Accuracy"], raw_text)
-            s2 = extract_score_robust(["可読性", "Readability", "読みやすさ"], raw_text)
-            s3 = extract_score_robust(["パフォーマンス", "性能", "Performance"], raw_text)
-            s4 = extract_score_robust(["スタイル", "飾り", "Style", "規約"], raw_text)
+            s1 = extract_score_robust(["正確性", "Accuracy"], raw_text)
+            s2 = extract_score_robust(["可読性", "Readability"], raw_text)
+            s3 = extract_score_robust(["パフォーマンス", "Performance"], raw_text)
+            s4 = extract_score_robust(["スタイル", "Style"], raw_text)
             
             total_score = s1 + s2 + s3 + s4
 
-            # --- 2. フィードバックのクリーニング：ZIP対応の安全な切り出し ---
-            # システムタグの除去
+            # --- フィードバックのクリーニング ---
             clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
             
-            # 【重要】以前の「```python」での一律カットを廃止
-            # 代わりに、明らかに「ソースコード一式の転記」が始まる目印だけを探す
+            # ソースコードの転記部分をカットするマーカー
             cutoff_markers = [
                 r'【採点対象コード】',
                 r'## 採点対象ソースコード',
@@ -240,8 +266,6 @@ def _run_ai_grading(item):
                     clean_text = parts[0]
                     break
             
-            # --- 3. 最終チェック：詳細が短すぎないか ---
-            # もしクリーニングの結果が短すぎたら、安全策として全文（タグ抜き）を採用
             if len(clean_text) < 50:
                 clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
 
@@ -255,7 +279,6 @@ def _run_ai_grading(item):
         print(f"AI Grading Error: {e}")
         
     return False
-
 # アップロード処理を修正
 @login_required
 def add_portfolio_item(request, portfolio_pk):
