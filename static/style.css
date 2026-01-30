@@ -2519,3 +2519,39 @@ body.company-application-page .main-container {
     color: #1e293b;
     transform: translateX(-5px); /* 少し左に動く演出で「戻る」感を強調 */
 }
+
+/* グリッド全体が親要素（profile-card）の幅いっぱいになるように強制 */
+.file-grid {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: 1fr; /* デフォルトは1枚ずつ縦に並べる */
+    gap: 24px;
+}
+
+/* PCなどの広い画面では2枚横並びにする（任意） */
+@media (min-width: 1024px) {
+    .file-grid {
+        grid-template-columns: 1fr 1fr; /* 2列に固定 */
+    }
+}
+
+/* カード自体の幅を保証する */
+.file-card {
+    width: 100% !important;
+    min-width: 0; /* これが無いと長い文字でカードが突き抜ける */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-feedback-content {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    
+    /* ★ 見切れ防止の重要設定 ★ */
+    padding-right: 25px !important; /* 右側に余裕を持たせる */
+    overflow-x: hidden;             /* 横スクロールを強制的に消す */
+    box-sizing: border-box;         /* パディングを幅の中に含める */
+    width: 100%;
+}

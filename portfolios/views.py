@@ -182,43 +182,31 @@ class PortfolioCommentUpdateView(LoginRequiredMixin, TeacherOnlyMixin, UpdateVie
 def _run_ai_grading(item):
     import re, requests, zipfile, io
     
-    uploaded_file = item.file 
     external_ai_url = "https://overtrustfully-pinnatisect-jarod.ngrok-free.dev/grade_file/"
     headers = {"ngrok-skip-browser-warning": "true", "User-Agent": "Django-Client"}
 
-    # --- 修正の要：ZIPファイルをテキストとして展開する ---
     combined_code = ""
     file_content_for_ai = b""
     
     try:
-        if uploaded_file.name.endswith('.zip'):
-            with zipfile.ZipFile(uploaded_file) as z:
-                for filename in z.namelist():
-                    # 不要なファイル（Macのシステムファイルやフォルダ）を除外
-                    if filename.startswith('__MACOSX') or filename.endswith('/'):
-                        continue
-                    
-                    # 採点対象の拡張子を指定
-                    if filename.endswith(('.py', '.html', '.c', '.md', '.css', '.js')):
-                        with z.open(filename) as f:
-                            try:
-                                content = f.read().decode('utf-8')
-                                combined_code += f"\n\n--- File: {filename} ---\n{content}"
-                            except UnicodeDecodeError:
-                                # 日本語コメントなどでエラーが出る場合はignoreで対応
+        # --- 1. ファイル読み込み処理 ---
+        with item.file.open('rb') as uploaded_file:
+            if item.file.name.endswith('.zip'):
+                with zipfile.ZipFile(uploaded_file) as z:
+                    for filename in z.namelist():
+                        if filename.startswith('__MACOSX') or filename.endswith('/'):
+                            continue
+                        if filename.endswith(('.py', '.html', '.c', '.md', '.css', '.js')):
+                            with z.open(filename) as f:
                                 content = f.read().decode('utf-8', errors='ignore')
                                 combined_code += f"\n\n--- File: {filename} ---\n{content}"
-            
-            # 結合したテキストを「ファイルデータ」としてAIに送る準備
-            file_content_for_ai = combined_code.encode('utf-8')
-            target_filename = "combined_project.txt"
-        else:
-            # ZIPでない場合は通常通り読み込み
-            with uploaded_file.open('rb') as f:
-                file_content_for_ai = f.read()
-            target_filename = uploaded_file.name
+                file_content_for_ai = combined_code.encode('utf-8')
+                target_filename = "combined_project.txt"
+            else:
+                file_content_for_ai = uploaded_file.read()
+                target_filename = item.file.name
 
-        # --- AIサーバーへの送信 ---
+        # --- 2. AIサーバーへの送信 ---
         files = {'upload': (target_filename, file_content_for_ai, 'text/plain')}
         response = requests.post(external_ai_url, files=files, headers=headers, timeout=180)
         
@@ -226,48 +214,52 @@ def _run_ai_grading(item):
             ai_data = response.json()
             raw_text = ai_data.get('result', '')
 
-            # --- スコア抽出：以前のロジックを維持 ---
+            # --- 3. スコア抽出ロジック (一本化) ---
             def extract_score_robust(keywords, text):
+                # SCOREタグで囲まれた範囲を優先的に探す
+                block_match = re.search(r'\[+SCORE\]+(.*?)\[+END\]+', text, re.DOTALL | re.IGNORECASE)
+                search_area = block_match.group(1) if block_match else text
+
                 for key in keywords:
-                    pattern = fr'{key}[^0-9\n]*?(\d+)\s*/\s*25'
-                    match = re.search(pattern, text, re.IGNORECASE)
+                    # キーワードの後の数字を探す（カッコや記号は無視）
+                    pattern = fr'{key}[^0-9\n]*?(\d+)'
+                    match = re.search(pattern, search_area)
                     if match:
-                        return int(match.group(1))
-                
-                sections = re.split(r'#+', text)
-                for section in sections:
-                    if any(key in section for key in keywords):
-                        match = re.search(r'(\d+)', section)
-                        if match:
-                            return min(int(match.group(1)), 25)
+                        return min(int(match.group(1)), 25)
                 return 0
 
             s1 = extract_score_robust(["正確性", "Accuracy"], raw_text)
             s2 = extract_score_robust(["可読性", "Readability"], raw_text)
-            s3 = extract_score_robust(["パフォーマンス", "Performance"], raw_text)
-            s4 = extract_score_robust(["スタイル", "Style"], raw_text)
-            
+            s3 = extract_score_robust(["パフォーマンス", "Performance", "性能"], raw_text)
+            s4 = extract_score_robust(["スタイル", "Style", "規約"], raw_text)
             total_score = s1 + s2 + s3 + s4
 
-            # --- フィードバックのクリーニング ---
-            clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
+            # --- 4. 分析レポートの抽出ロジック (一本化) ---
             
-            # ソースコードの転記部分をカットするマーカー
-            cutoff_markers = [
-                r'【採点対象コード】',
-                r'## 採点対象ソースコード',
-                r'## ソースコード全文',
-                r'以下は採点対象のソースコードです'
-            ]
+            # [[END]] タグで分割し、その後ろ側をレポートとして採用する
+            report_parts = re.split(r'\[+END\]+', raw_text, maxsplit=1, flags=re.IGNORECASE)
             
+            if len(report_parts) > 1:
+                clean_text = report_parts[1].strip()
+            else:
+                # [[END]] がない場合はタグ全体を消去して残りを採用
+                clean_text = re.sub(r'\[+SCORE\]+.*?\[+END\]+', '', raw_text, flags=re.DOTALL | re.IGNORECASE).strip()
+
+            # 余計なゴミ（見出しの繰り返しや点数リストの残り）を削除
+            clean_text = clean_text.replace('■分析レポート', '').strip()
+            clean_text = re.sub(r'^(正確性|可読性|パフォーマンス|スタイル).*?(\n|$)', '', clean_text, flags=re.MULTILINE)
+            
+            # ソースコードの再掲部分があればカット
+            cutoff_markers = [r'【採点対象コード】', r'【対象コード】', r'--- File:']
             for marker in cutoff_markers:
                 parts = re.split(marker, clean_text)
                 if len(parts) > 1:
                     clean_text = parts[0]
                     break
-            
-            if len(clean_text) < 50:
-                clean_text = re.sub(r'\[+SCORE\]+|\[+END\]+', '', raw_text).strip()
+
+            # 最終チェック：極端に短い場合は生データを出す（空欄防止）
+            if len(clean_text.strip()) < 5:
+                clean_text = re.sub(r'\[+SCORE\]+.*?\[+END\]+', '', raw_text, flags=re.DOTALL | re.IGNORECASE).strip()
 
             # 保存
             item.ai_score = total_score
