@@ -2424,7 +2424,7 @@ body.company-application-page .main-container {
     flex-shrink: 0; /* 画面が狭くなっても潰れないようにする */
 }
 
-/* --- 共通カード型レイアウト (kimimatch) --- */
+/* --- 共通カード型レイアウト (キミマッチ) --- */
 
 /* グリッドコンテナ: カードを横に並べる */
 .company-grid {
@@ -2538,7 +2538,7 @@ body.company-application-page .main-container {
 
 
 /* カードを独立した「箱」として定義する */
-.kimimatch-card {
+.キミマッチ-card {
     background-color: #ffffff !important; /* 背景を白に固定 */
     border: 1px solid #dee2e6 !important; /* 境界線を強制表示 */
     border-radius: 12px !important;
@@ -2546,7 +2546,7 @@ body.company-application-page .main-container {
 }
 
 /* ホバー時に浮き上がる演出（企業ごとに分かれていることがより強調されます） */
-.kimimatch-card:hover {
+.キミマッチ-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
     border-color: #198754 !important; /* 枠線を緑に */
