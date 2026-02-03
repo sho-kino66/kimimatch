@@ -278,16 +278,20 @@ class CompanyStudentListView(LoginRequiredMixin, CompanyOnlyMixin, ListView):
         return context
 
 # お気に入り企業一覧ビュー (学生用)
-class FavoriteCompanyListView(LoginRequiredMixin, StudentOnlyMixin, ListView):
+class FavoriteCompanyListView(LoginRequiredMixin, ListView):
     model = FavoriteCompany
-    template_name = 'accounts/favorite_company_list.html'
+    # ★ 実際のファイル名に合わせて明示的に指定します
+    template_name = 'accounts/favorite_company_list.html' 
     context_object_name = 'favorites'
-    paginate_by = 10
+    
+    # ★ これが無いと全件が1ページに出力されます
+    paginate_by = 9 
 
     def get_queryset(self):
-        student = self.request.user.student
-        return FavoriteCompany.objects.filter(student=student).order_by('-created_at')
-
+        # ログイン中の学生のお気に入りを取得
+        return FavoriteCompany.objects.filter(
+            student=self.request.user.student
+        ).order_by('-id')
 # スカウト追加ビュー
 @login_required
 def add_scout(request, student_pk):

@@ -1,14 +1,14 @@
 from django.urls import path
 from . import views 
 
-app_name = 'companies' # app_name はOKです
+app_name = 'companies'
 
 urlpatterns = [
     # 企業一覧
     path('list/', views.CompanyListView.as_view(), name='list'),
     
-    # 企業詳細
-    path('<int:pk>/', views.CompanyDetailView.as_view(), name='detail'),
+    # 企業詳細（name を 'detail' から 'company_detail' に変更）
+    path('<int:pk>/', views.CompanyDetailView.as_view(), name='company_detail'), # ← ここを修正
     
     path('<int:company_pk>/add_favorite/', views.add_favorite, name='add_favorite'),
     path('<int:company_pk>/remove_favorite/', views.remove_favorite, name='remove_favorite'),

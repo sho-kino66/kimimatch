@@ -1,53 +1,89 @@
 {% extends "base.html" %}
-{% block title %}お気に入り企業一覧{% endblock %}
+{% block title %}お気に入り企業 | Kimimatch{% endblock %}
 
 {% block content %}
 <div class="page-container">
-  <h2 class="page-title">お気に入り企業一覧</h2>
-  
-  {% if favorites %}
+    <h2 class="page-title">お気に入り企業一覧</h2>
+
+    {% if favorites %}
     <div class="company-grid">
-      {% for fav in favorites %}
-        <div class="company-card">
-          <div class="card-body">
-            <span class="industry-tag">{{ fav.company.industry }}</span>
-            
-            <h3 class="company-name">{{ fav.company.name }}</h3>
-            
-            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">
-              登録日: {{ fav.created_at|date:"Y/m/d" }}
-            </p>
-
-            <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
-              
-              <a href="{% url 'companies:detail' fav.company.pk %}?source=favorites" class="btn-card-detail">
-                詳細を見る →
-              </a>
-
-              <form action="{% url 'companies:remove_favorite' fav.company.pk %}" method="post" style="margin:0;">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{% url 'accounts:favorite_list' %}">
+        {% for fav in favorites %}
+        <div class="company-card compact-card">
+            <div class="card-body">
+                <span class="industry-tag small-tag">{{ fav.company.industry }}</span>
+                <h3 class="company-name compact-name">{{ fav.company.name }}</h3>
                 
-                <button type="submit" class="btn-card-delete" onclick="return confirm('{{ fav.company.name }} をお気に入りから解除しますか？');">
-                  🗑️ 解除
-                </button>
-              </form>
-
+                <p class="company-description compact-description">
+                    {{ fav.company.description|truncatechars:45 }}
+                </p>
+                
+                <div class="card-footer compact-footer">
+                    <a href="{% url 'companies:company_detail' fav.company.pk %}" class="btn-detail-sm">
+                        詳細 <span>→</span>
+                    </a>
+                    
+                    <form action="{% url 'companies:remove_favorite' fav.company.pk %}" method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" class="btn-remove-link" title="解除">
+                             <i class="bi bi-heart-fill text-danger"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
-          </div>
         </div>
-      {% endfor %}
+        {% endfor %}
     </div>
-
-  {% else %}
-    <div class="no-result" style="text-align: center; padding: 40px; background-color: #f9f9f9; border-radius: 12px;">
-      <p style="color: #666; margin-bottom: 20px;">お気に入りに登録された企業はまだありません。</p>
-      <a href="{% url 'companies:list' %}" class="btn-create" style="display:inline-block;">企業を探しに行く</a>
+    {% else %}
+    <div class="no-result">
+        <p>お気に入り登録した企業はまだありません。</p>
+        <a href="{% url 'companies:list' %}" class="btn-search-link">企業を探しに行く</a>
     </div>
-  {% endif %}
-
-  <div class="page-footer" style="margin-top: 30px;">
-    <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
-  </div>
+    {% endif %}
 </div>
+{% if is_paginated %}
+<div class="pagination-wrapper" style="margin: 40px 0; text-align: center;">
+    <div class="pagination-custom">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link-compact">前へ</a>
+        {% endif %}
+
+        <span class="page-current">
+            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link-compact">次へ</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+  .pagination-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
+  .page-link-compact {
+    padding: 8px 20px;
+    background: #198754;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  .page-link-compact:hover {
+    background: #146c43;
+    transform: scale(1.05);
+  }
+  .page-current {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+  }
+</style>
 {% endblock %}

@@ -10,23 +10,17 @@ def generate_company_code():
     return ''.join(secrets.choice(chars) for _ in range(8))
 
 class Company(models.Model):
+    # --- 既存のフィールド ---
     name = models.CharField(max_length=100, verbose_name="企業名")
     industry = models.CharField(max_length=100, verbose_name="業種")
     description = models.TextField(verbose_name="事業内容")
-    
-    # 企業ホームページURL
     website_url = models.URLField(verbose_name="企業ホームページ", blank=True, null=True)
+    logo = models.ImageField(upload_to='company_logos/', verbose_name="企業ロゴ", blank=True, null=True)
+    
+    # ★★★ 追加: 登録日時フィールド ★★★
+    # auto_now_add=True を設定することで、データが作成された時間が自動で保存されます
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="登録日時")
 
-    # ★★★ 追加: 企業ロゴ画像 ★★★
-    # upload_to='company_logos/' で、mediaフォルダ内の保存先を指定しています
-    logo = models.ImageField(
-        upload_to='company_logos/', 
-        verbose_name="企業ロゴ", 
-        blank=True, 
-        null=True
-    )
-
-    # 企業コード
     code = models.CharField(
         max_length=8, 
         default=generate_company_code, 

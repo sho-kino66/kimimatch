@@ -19,10 +19,10 @@
               <span><strong>{{ scout.company.name }}</strong> からスカウトが届いています！</span>
               
               {# --- 企業詳細ボタン --- #}
-            <a href="{% url 'companies:detail' scout.company.pk %}" 
+            <a href="{% url 'companies:company_detail' scout.company.pk %}" 
               class="btn-primary" 
               style="background: #007bff; color: white; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;">
-                企業詳細を見る
+              企業詳細を見る
             </a>
             </div>
           </li>

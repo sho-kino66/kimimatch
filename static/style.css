@@ -2535,23 +2535,96 @@ body.company-application-page .main-container {
     }
 }
 
-/* カード自体の幅を保証する */
-.file-card {
-    width: 100% !important;
-    min-width: 0; /* これが無いと長い文字でカードが突き抜ける */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+
+
+/* カードを独立した「箱」として定義する */
+.kimimatch-card {
+    background-color: #ffffff !important; /* 背景を白に固定 */
+    border: 1px solid #dee2e6 !important; /* 境界線を強制表示 */
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
 }
 
-.ai-feedback-content {
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-wrap: break-word;
-    
-    /* ★ 見切れ防止の重要設定 ★ */
-    padding-right: 25px !important; /* 右側に余裕を持たせる */
-    overflow-x: hidden;             /* 横スクロールを強制的に消す */
-    box-sizing: border-box;         /* パディングを幅の中に含める */
-    width: 100%;
+/* ホバー時に浮き上がる演出（企業ごとに分かれていることがより強調されます） */
+.kimimatch-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    border-color: #198754 !important; /* 枠線を緑に */
+}
+
+/* カード全体のパディングを 25px から 15px 程度に縮小 */
+.compact-card {
+  padding: 15px !important;
+  min-height: auto !important; /* 高さを内容に合わせる */
+}
+
+/* 業種タグのサイズとマージンを縮小 */
+.small-tag {
+  font-size: 0.7rem !important;
+  margin-bottom: 4px !important;
+  display: inline-block;
+}
+
+/* 企業名の上下マージンをカット */
+.compact-name {
+  margin: 4px 0 8px 0 !important;
+  font-size: 1.2rem !important;
+  line-height: 1.2 !important;
+}
+
+/* 説明文のフォントサイズを下げ、下の余白を詰める */
+.compact-description {
+  font-size: 0.8rem !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+  color: #666;
+}
+
+/* フッターの境界線とパディングを調整 */
+.compact-footer {
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #eee;
+}
+
+/* ボタンも少しスリムに */
+.btn-detail-sm {
+  font-size: 0.8rem !important;
+  padding: 4px 10px !important;
+  background: #edf3f0;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.company-grid {
+  display: grid !important;
+  /* PCでは3枚、隙間を 30px 以上に広げて重なりを物理的に防ぎます */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  column-gap: 24px !important;
+  row-gap: 40px !important; /* ★ 縦の隙間をしっかり確保 */
+  padding: 20px 0 !important;
+  position: relative !important;
+}
+
+.company-card.compact-card {
+  /* 以前の absolute 等が残っている場合に備えてリセット */
+  position: relative !important; 
+  top: auto !important;
+  left: auto !important;
+  
+  /* 縦幅をコンパクトにしつつ、重ならない設定 */
+  height: fit-content !important; /* 中身に合わせる */
+  min-height: 180px !important;   /* 最低限の高さ */
+  margin: 0 !important;
+  
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+  z-index: 1; /* 重なり順をフラットに */
+}
+
+/* 内部の余白をさらに詰め、縦幅を最小化 */
+.compact-card .card-body {
+  padding: 12px 15px !important;
 }

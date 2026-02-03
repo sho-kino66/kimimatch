@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}企業を探す{% endblock %}
+{% block title %}企業を探す | Kimimatch{% endblock %}
 
 {% block content %}
 <div class="page-container">
@@ -26,36 +26,105 @@
 
   <hr class="divider">
 
-  {% if companies %}
+  {% if page_obj %}
     <div class="company-grid">
-      {% for company in companies %}
-        <div class="company-card">
-          <div class="card-body">
-            <span class="industry-tag">{{ company.industry }}</span>
-            <h3 class="company-name">{{ company.name }}</h3>
+    {% for company in page_obj %}
+        <div class="company-card compact-card">
+        <div class="card-body">
+            <span class="industry-tag small-tag">{{ company.industry }}</span>
+            <h3 class="company-name compact-name">{{ company.name }}</h3>
             
-            <div class="card-footer">
-              <a href="{% url 'companies:detail' company.pk %}" class="btn-detail">
-                詳細を見る <span>→</span>
-              </a>
+            <p class="company-description compact-description">
+            {{ company.description|truncatechars:45 }}
+            </p>
+            
+            <div class="card-footer compact-footer">
+            <a href="{% url 'companies:company_detail' company.pk %}" class="btn-detail-sm">
+                詳細 <span>→</span>
+            </a>
+            <span class="reg-date">登録: {{ company.created_at|date:"y/m/d" }}</span>
             </div>
-          </div>
         </div>
-      {% endfor %}
+        </div>
+    {% endfor %}
     </div>
-    
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&query={{ query }}&sort={{ sort_by }}" class="page-link">前へ</a>
+        {% endif %}
+        <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&query={{ query }}&sort={{ sort_by }}" class="page-link">次へ</a>
+        {% endif %}
+    </div>
+
   {% else %}
     <div class="no-result">
-      {% if query %}
-        <p>「<strong>{{ query }}</strong>」に一致する企業は見つかりませんでした。</p>
-      {% else %}
-        <p>企業はまだ登録されていません。</p>
-      {% endif %}
+      <p>該当する企業は見つかりませんでした。</p>
     </div>
   {% endif %}
   
-  <div class="page-footer">
+  <div class="page-footer text-center" style="margin-top: 3rem;">
     <a href="{% url 'accounts:dashboard' %}" class="back-link">← メインメニューに戻る</a>
   </div>
 </div>
+
+<style>
+  .company-grid {
+    display: grid !important;
+    /* ★ PCでは3枚ずつ、スマホでは1枚ずつ並べる魔法の1行 */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 20px !important;
+    padding: 20px 0 !important;
+  }
+
+  /* 以前の成功したカードの見た目を再現 */
+  .company-card {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important; /* 枠線を復活 */
+    border-radius: 12px !important;
+    padding: 25px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .company-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+
+  .industry-tag {
+    color: #198754;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .company-name {
+    margin: 10px 0;
+    color: #2c3e50;
+    font-size: 1.4rem;
+  }
+
+  .company-description {
+    font-size: 0.9rem;
+    color: #666;
+    flex-grow: 1; /* 中身が短くてもフッターを下に固定 */
+  }
+
+  .card-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .reg-date {
+    font-size: 0.75rem;
+    color: #999;
+  }
+</style>
 {% endblock %}
