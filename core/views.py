@@ -5,6 +5,8 @@ from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib import messages
+from .forms import InquiryForm
 
 from .models import Announcement
 from .forms import SchoolApplicationForm, CompanyApplicationForm
@@ -66,3 +68,18 @@ class CompanyApplicationView(FormView):
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, superuser_emails, fail_silently=False)
 
         return super().form_valid(form)
+
+def inquiry_view(request):
+    if request.method == 'POST':
+        form = InquiryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'お問い合わせを送信しました。')
+            return redirect('core:inquiry_success')
+    else:
+        form = InquiryForm()
+    
+    return render(request, 'core/inquiry_form.html', {'form': form})
+
+def inquiry_success_view(request):
+    return render(request, 'core/inquiry_success.html')

@@ -15,4 +15,6 @@ urlpatterns = [
     path('application/success/', views.application_success, name='application_success'),
 
     path('announcements/<int:pk>/', views.announcement_detail, name='announcement_detail'),
+    path('inquiry/', views.inquiry_view, name='inquiry'),
+    path('inquiry/success/', views.inquiry_success_view, name='inquiry_success'),
 ]

@@ -2628,3 +2628,51 @@ body.company-application-page .main-container {
 .compact-card .card-body {
   padding: 12px 15px !important;
 }
+
+/* --- 1. ゲスト（トップページ・未ログイン時）：ブランドカラーの赤 --- */
+.role-guest header {
+    background-color: #df140d !important; /* メインカラーの赤 */
+    color: white !important;
+}
+.role-guest header h1 a,
+.role-guest nav a {
+    color: white !important;
+}
+
+.floating-inquiry-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #d9534f; /* デフォルトはブランドカラーの赤 */
+    color: white !important;
+    text-decoration: none !important;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* ログインユーザーの役割に合わせてボタンの色も変える */
+.role-student .floating-inquiry-btn { background-color: #198754; }
+.role-teacher .floating-inquiry-btn { background-color: #0d6efd; }
+.role-companyrepresentative .floating-inquiry-btn { background-color: #ffc107; color: #333 !important; }
+
+.floating-inquiry-btn:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.btn-icon {
+    font-weight: bold;
+    margin-right: 8px;
+    background: rgba(255,255,255,0.2);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
