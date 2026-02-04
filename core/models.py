@@ -37,3 +37,17 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "タグ"
         verbose_name_plural = "タグ一覧"
+
+class Inquiry(models.Model):
+    name = models.CharField(max_length=100, verbose_name="お名前")
+    email = models.EmailField(verbose_name="メールアドレス")
+    subject = models.CharField(max_length=200, verbose_name="件名")
+    message = models.TextField(verbose_name="お問い合わせ内容")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="送信日")
+
+    class Meta:
+        verbose_name = "お問い合わせ"         
+        verbose_name_plural = "お問い合わせ"
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"

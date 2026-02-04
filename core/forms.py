@@ -1,4 +1,12 @@
 from django import forms
+from .models import Inquiry
+from django.core.validators import RegexValidator  # ★追加
+
+# --- 電話番号用のバリデーター（数字とハイフンのみ許可） ---
+tel_validator = RegexValidator(
+    regex=r'^[0-9-]+$',
+    message='電話番号は数字とハイフン（-）のみで入力してください。'
+)
 
 class SchoolApplicationForm(forms.Form):
     school_name = forms.CharField(
@@ -15,7 +23,8 @@ class SchoolApplicationForm(forms.Form):
     )
     phone = forms.CharField(
         label="電話番号", max_length=20, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full'})
+        validators=[tel_validator],  # ★バリデーターを適用
+        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '090-1234-5678', 'type': 'tel'}) # type="tel"を追加
     )
     address = forms.CharField(
         label="住所", max_length=255, required=True,
@@ -37,9 +46,21 @@ class CompanyApplicationForm(forms.Form):
     )
     phone = forms.CharField(
         label="電話番号", max_length=20, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full'})
+        validators=[tel_validator],  # ★バリデーターを適用
+        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '03-1234-5678', 'type': 'tel'}) # type="tel"を追加
     )
     address = forms.CharField(
         label="住所", max_length=255, required=True,
         widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：東京都新宿区西新宿1-1-1'})
     )
+
+class InquiryForm(forms.ModelForm):
+    class Meta:
+        model = Inquiry
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '田中 太郎'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@mail.com'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'スカウト機能について'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'こちらにお問い合わせ内容をご記入ください'}),
+        }
