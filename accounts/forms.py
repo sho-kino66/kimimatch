@@ -204,6 +204,24 @@ class StudentTagUpdateForm(forms.Form):
                 widget=forms.Select(attrs={'class': 'form-control'})
             )
 
+    # ★ 追加: 重複チェックバリデーション
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # 「強み」と「求めるもの」それぞれの重複を確認
+        for category, label in [('strength', '自分の強み'), ('desire', '会社に求めるもの')]:
+            selected_tags = []
+            for i in range(1, 6):
+                field_name = f'{category}_{i}'
+                tag = cleaned_data.get(field_name)
+                if tag:
+                    if tag in selected_tags:
+                        # 重複が見つかった特定のフィールドにエラーを付与
+                        self.add_error(field_name, f'同じ「{tag.name}」が既に選択されています。')
+                    else:
+                        selected_tags.append(tag)
+        return cleaned_data
+
     def save(self):
         student = self.user.student
         StudentTag.objects.filter(student=student).delete()
@@ -228,6 +246,23 @@ class CompanyTagUpdateForm(forms.Form):
                 widget=forms.Select(attrs={'class': 'form-control'})
             )
 
+    # ★ 追加: 重複チェックバリデーション
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # 「求める強み」と「自社の特徴」それぞれの重複を確認
+        for category, label in [('strength', '求める人材の強み'), ('feature', '自社の特徴・政策')]:
+            selected_tags = []
+            for i in range(1, 6):
+                field_name = f'{category}_{i}'
+                tag = cleaned_data.get(field_name)
+                if tag:
+                    if tag in selected_tags:
+                        self.add_error(field_name, f'同じ「{tag.name}」が既に選択されています。')
+                    else:
+                        selected_tags.append(tag)
+        return cleaned_data
+
     def save(self):
         company = self.user.companyrepresentative.company
         CompanyTag.objects.filter(company=company).delete()
@@ -240,4 +275,6 @@ class TeacherCommentForm(forms.ModelForm):
     class Meta:
         model = Student
         fields = ['comment']
-        widgets = {'comment': forms.Textarea(attrs={'rows': 5, 'placeholder': '学生の推薦コメントを入力してください'})}
+        widgets = {
+            'comment': forms.Textarea(attrs={'rows': 5, 'placeholder': '学生の推薦コメントを入力してください'}),
+        }
