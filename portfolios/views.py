@@ -275,6 +275,14 @@ def _run_ai_grading(item):
 @login_required
 def add_portfolio_item(request, portfolio_pk):
     portfolio = get_object_or_404(Portfolio, pk=portfolio_pk)
+    
+    # セキュリティチェック
+    try:
+        if portfolio.student != request.user.student:
+            return HttpResponseForbidden("アクセス権がありません。")
+    except Student.DoesNotExist:
+        return HttpResponseForbidden("アクセス権がありません。")
+
     if request.method == 'POST':
         form = PortfolioItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -282,11 +290,23 @@ def add_portfolio_item(request, portfolio_pk):
             item.portfolio = portfolio
             item.save()
             
-            # ★ 作成したばかりの「item」を採点に回す
+            # AI採点を開始
             _run_ai_grading(item)
             
-    return redirect('portfolios:detail', pk=portfolio_pk)
+            # ★ 成功した時だけリダイレクトする
+            return redirect('portfolios:detail', pk=portfolio_pk)
+        else:
+            # ★ ここが修正のキモ：バリデーションエラー（規定外ファイル等）がある場合
+            # リダイレクトせずに、詳細画面のコンテキストを揃えて再表示(render)する
+            items = portfolio.items.all()
+            return render(request, 'portfolios/portfolio_detail.html', {
+                'portfolio': portfolio,
+                'items': items,
+                'item_form': form, # エラー情報が詰まったフォームを渡す
+            })
 
+    # POST以外でアクセスされた場合
+    return redirect('portfolios:detail', pk=portfolio_pk)
 # --- 個別採点ボタン用（再採点したい時のために残す） ---
 @csrf_exempt
 @login_required

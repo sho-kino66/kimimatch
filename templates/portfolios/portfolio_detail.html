@@ -5,163 +5,224 @@
 {% block content %}
 
 <div class="page-container">
-  <div class="profile-card">
+    <div class="profile-card">
 
-    <h2>{{ portfolio.title }}</h2>
-    <p class="portfolio-description">{{ portfolio.description | linebreaksbr }}</p>
+        <h2>{{ portfolio.title }}</h2>
+        <p class="portfolio-description">{{ portfolio.description | linebreaksbr }}</p>
 
-    <div style="margin-bottom: 20px;">
-      <a href="{% url 'portfolios:update' portfolio.pk %}?next={% url 'portfolios:detail' portfolio.pk %}" class="btn btn-edit">
-        タイトル・説明を編集
-      </a>
-      <a href="{% url 'portfolios:delete' portfolio.pk %}" class="btn btn-delete">
-        削除
-      </a>
-    </div>
-
-    {% if portfolio.teacher_comment %}
-      <div class="teacher-comment-portfolio" style="background-color: #f8f9fa; border-left: 4px solid #6c757d; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-        <strong>教員コメント {% if portfolio.commenting_teacher %}<span>({{ portfolio.commenting_teacher.full_name }} 先生)</span>{% endif %}</strong>
-        <p style="margin-top: 5px;">{{ portfolio.teacher_comment }}</p>
-      </div>
-    {% endif %}
-
-    <hr>
-
-    <div class="ai-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-      <span style="font-size: 1.5rem;">🤖</span>
-      <h3 style="margin: 0; color: #14532d;">AI作品添削アドバイス</h3>
-    </div>
-
-    <h3>成果物（ファイル）</h3>
-    
-    {% if items %}
-      <div class="file-grid">
-        {% for item in items %}
-          <div class="file-card" style="border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-              <div class="file-card-header">
-                <a href="{{ item.file.url }}" target="_blank" style="font-weight: bold; text-decoration: none; color: #007bff; font-size: 1.1rem;">
-                  📄 {{ item.file.name }}
-                </a>
-                <form action="{% url 'portfolios:delete_item' item.pk %}" method="post" style="margin: 0;" onsubmit="return confirm('このファイルを削除しますか？評価結果も削除されます。');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-delete" style="font-size: 0.8rem; padding: 5px 10px;">削除</button>
-                </form>
-              </div>
-            </div>
-
-            {% if item.ai_score is not None %}
-              <div style="background-color: #f0fdf4; border: 1px solid #b7e4c7; border-radius: 10px; padding: 15px;">
-                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;">
-                  <span style="font-weight: bold; color: #14532d;">AI評価:</span>
-                  <span style="font-size: 1.6rem; font-weight: bold; color: #16a34a;">{{ item.ai_score }}</span>
-                  <span style="font-weight: bold; color: #16a34a;">/ 100</span>
-                </div>
-
-                <details style="background: white; border: 1px solid #dcfce7; border-radius: 8px; overflow: hidden;">
-                  <summary style="padding: 10px 15px; cursor: pointer; color: #15803d; font-weight: bold; background-color: #f8fff9; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📝 分析レポートの詳細を読む</span>
-                    <span style="font-size: 0.8rem;">▼</span>
-                  </summary>
-                  <div class="ai-feedback-content" style="padding: 15px; border-top: 1px solid #dcfce7; font-size: 0.95rem; line-height: 1.7; color: #333;">
-                    {{ item.ai_feedback|linebreaksbr }}
-                  </div>
-                </details>
-              </div>
-            {% else %}
-              <div style="background-color: #f8f9fa; border: 1px solid #eee; border-radius: 10px; padding: 15px; color: #666; font-size: 0.9rem;">
-                （このファイルのAI解析結果はありません。アップロードし直すと採点されます）
-              </div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div style="padding: 30px; text-align: center; background: #f9f9f9; border-radius: 10px; color: #999; margin-bottom: 30px;">
-        <p>現在、アップロードされている作品はありません。</p>
-      </div>
-    {% endif %}
-
-    <hr>
-
-    <div class="upload-section" style="background-color: #f8f9ff; border: 1px dashed #4a90e2; border-radius: 12px; padding: 25px;">
-      <h4 style="margin-top: 0; color: #2c3e50;">作品をアップロードしてAI採点する</h4>
-      <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
-        ファイルをアップロードすると、自動的にAIが内容を分析し、アドバイスとスコアを生成します。<br>
-        <strong>対応形式:</strong> ZIP (ソースコード一式), PDF, JPG, PNG
-      </p>
-      
-      <form action="{% url 'portfolios:add_item' portfolio.pk %}" 
-            method="post" 
-            enctype="multipart/form-data"
-            id="upload-and-grade-form">
-        {% csrf_token %}
-        
         <div style="margin-bottom: 20px;">
-          {{ item_form.file.label_tag }}<br>
-          {{ item_form.file }}
-          {% if item_form.file.help_text %}
-            <p style="font-size: 0.8rem; color: #888;">{{ item_form.file.help_text }}</p>
-          {% endif %}
+            <a href="{% url 'portfolios:update' portfolio.pk %}?next={% url 'portfolios:detail' portfolio.pk %}" class="btn btn-edit">
+                タイトル・説明を編集
+            </a>
+            <a href="{% url 'portfolios:delete' portfolio.pk %}" class="btn btn-delete">
+                削除
+            </a>
         </div>
+
+        {# --- 教員コメント表示エリア --- #}
+        {% if portfolio.teacher_comment %}
+            <div class="teacher-comment-portfolio" style="background-color: #f8f9fa; border-left: 4px solid #6c757d; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <strong>教員コメント {% if portfolio.commenting_teacher %}<span>({{ portfolio.commenting_teacher.full_name }} 先生)</span>{% endif %}</strong>
+                <p style="margin-top: 5px;">{{ portfolio.teacher_comment }}</p>
+            </div>
+        {% endif %}
+
+        <hr>
+
+        {# --- 成果物（ファイル）一覧 --- #}
+        <div class="ai-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <span style="font-size: 1.5rem;">🤖</span>
+            <h3 style="margin: 0; color: #14532d;">AI作品添削アドバイス</h3>
+        </div>
+
+        <h3>成果物（ファイル）</h3>
         
-        <button type="submit" id="submit-btn" style="background-color: #15803d; color: white; padding: 12px 25px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; transition: background 0.3s;">
-          アップロード ＋ AI解析を開始
-        </button>
+        {% if items %}
+            <div class="file-grid">
+                {% for item in items %}
+                    <div class="file-card" style="border: 1px solid #ddd; border-radius: 12px; padding: 20px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div class="file-card-header" style="width: 100%; display: flex; justify-content: space-between;">
+                                <a href="{{ item.file.url }}" target="_blank" style="font-weight: bold; text-decoration: none; color: #007bff; font-size: 1.1rem;">
+                                    📄 {{ item.file.name }}
+                                </a>
+                                <form action="{% url 'portfolios:delete_item' item.pk %}" method="post" style="margin: 0;" onsubmit="return confirm('このファイルを削除しますか？評価結果も削除されます。');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-delete" style="font-size: 0.8rem; padding: 5px 10px;">削除</button>
+                                </form>
+                            </div>
+                        </div>
 
-        <div id="ai-loading" style="display: none; margin-top: 20px;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #15803d; font-weight: bold; background: white; padding: 15px; border-radius: 8px; border: 1px solid #b7e4c7;">
-            <span class="spinner"></span>
-            AIが作品を分析しています... (最大3分)
-          </div>
+                        {% if item.ai_score is not None %}
+                            <div style="background-color: #f0fdf4; border: 1px solid #b7e4c7; border-radius: 10px; padding: 15px;">
+                                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;">
+                                    <span style="font-weight: bold; color: #14532d;">AI評価:</span>
+                                    <span style="font-size: 1.6rem; font-weight: bold; color: #16a34a;">{{ item.ai_score }}</span>
+                                    <span style="font-weight: bold; color: #16a34a;">/ 100</span>
+                                </div>
+
+                                <details style="background: white; border: 1px solid #dcfce7; border-radius: 8px; overflow: hidden;">
+                                    <summary style="padding: 10px 15px; cursor: pointer; color: #15803d; font-weight: bold; background-color: #f8fff9; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                                        <span>📝 分析レポートの詳細を読む</span>
+                                        <span style="font-size: 0.8rem;">▼</span>
+                                    </summary>
+                                    <div class="ai-feedback-content" style="padding: 15px; border-top: 1px solid #dcfce7; font-size: 0.95rem; line-height: 1.7; color: #333;">
+                                        {{ item.ai_feedback|linebreaksbr }}
+                                    </div>
+                                </details>
+                            </div>
+                        {% else %}
+                            <div style="background-color: #f8f9fa; border: 1px solid #eee; border-radius: 10px; padding: 15px; color: #666; font-size: 0.9rem;">
+                                （このファイルのAI解析結果はありません。アップロードし直すと採点されます）
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="padding: 30px; text-align: center; background: #f9f9f9; border-radius: 10px; color: #999; margin-bottom: 30px;">
+                <p>現在、アップロードされている作品はありません。</p>
+            </div>
+        {% endif %}
+
+        <hr>
+
+        {# --- アップロード ＋ AI解析 セクション --- #}
+        <div class="upload-section" style="background-color: #f8f9ff; border: 1px dashed #4a90e2; border-radius: 12px; padding: 25px; position: relative;">
+            <h4 style="margin-top: 0; color: #2c3e50;">作品をアップロードしてAI採点する</h4>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+                ファイルをアップロードすると、自動的にAIが内容を分析し、アドバイスとスコアを生成します。<br>
+                <strong>対応形式:</strong> ZIP, PDF, JPG, PNG, PY, HTML, CSS, JS (最大5MB)
+            </p>
+            
+            <form action="{% url 'portfolios:add_item' portfolio.pk %}" 
+                  method="post" 
+                  enctype="multipart/form-data"
+                  id="upload-and-grade-form">
+                {% csrf_token %}
+                
+                <div style="margin-bottom: 30px; position: relative;">
+                    <label style="font-weight: bold; color: #444;">{{ item_form.file.label }}</label><br>
+                    
+                    <div style="position: relative; margin-top: 10px;">
+                        {{ item_form.file }}
+                        
+                        {# --- 規定外ファイル・サイズオーバー時の吹き出しエラー --- #}
+                        {% if item_form.file.errors %}
+                            <div class="error-bubble" id="file-error-bubble" style="
+                                position: absolute;
+                                top: calc(100% + 12px);
+                                left: 0;
+                                background-color: #e31919;
+                                color: white;
+                                padding: 8px 15px;
+                                border-radius: 6px;
+                                font-size: 0.8rem;
+                                font-weight: bold;
+                                z-index: 100;
+                                white-space: normal;
+                                box-shadow: 0 4px 12px rgba(227, 25, 25, 0.3);
+                                max-width: 100%;
+                            ">
+                                <div style="position: absolute; top: -6px; left: 15px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid #e31919;"></div>
+                                {% for error in item_form.file.errors %}
+                                    <div style="display: flex; align-items: center;">⚠️ {{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if item_form.file.help_text %}
+                        <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">{{ item_form.file.help_text }}</p>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" id="submit-btn" style="background-color: #15803d; color: white; padding: 12px 25px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; transition: background 0.3s;">
+                    アップロード ＋ AI解析を開始
+                </button>
+
+                <div id="ai-loading" style="display: none; margin-top: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #15803d; font-weight: bold; background: white; padding: 15px; border-radius: 8px; border: 1px solid #b7e4c7;">
+                        <span class="spinner"></span>
+                        AIが作品を分析しています... (最大3分)
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
+
+        <hr style="margin: 30px 0;">
+        <a href="{% url 'accounts:my_page' %}" class="back-link" style="text-decoration: none; color: #666; font-size: 0.9rem; font-weight: 500;">← マイページに戻る</a>
+
     </div>
-
-    <hr style="margin: 30px 0;">
-    <a href="{% url 'accounts:my_page' %}" class="back-link" style="text-decoration: none; color: #666;">← マイページに戻る</a>
-
-  </div>
 </div>
 
 <style>
-  /* グリッド全体：常に1列（100%幅）で表示 */
-  .file-grid {
-    display: grid !important;
-    grid-template-columns: 1fr !important; /* ★ここを1frに固定 */
-    gap: 30px; /* カード同士の間隔を少し広めに */
-    width: 100% !important;
-    margin-bottom: 30px;
-  }
-
-  /* カード自体の設定：1カラムに合わせて余白を調整 */
-  .file-card {
-    width: 100% !important;
-    min-width: 0; 
-    box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; /* 少し影を強くして1つずつの存在感を出す */
-  }
-
-  /* AIレポート：長い単語の折り返し設定（継続） */
-  .ai-feedback-content {
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-wrap: break-word;
-    background-color: #fcfdfc;
-  }
-</style>
-<script>
-// フォーム送信時にボタンを隠してローディングを表示
-document.getElementById('upload-and-grade-form').onsubmit = function() {
-    const fileInput = document.querySelector('input[type="file"]');
-    if (!fileInput.value) {
-        alert("ファイルを選択してください。");
-        return false;
+    .file-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 30px;
+        width: 100% !important;
+        margin-bottom: 30px;
     }
-    document.getElementById('submit-btn').style.display = 'none';
-    document.getElementById('ai-loading').style.display = 'block';
-};
+
+    .ai-feedback-content {
+        white-space: pre-wrap;
+        word-break: break-all;
+        overflow-wrap: break-word;
+        background-color: #fcfdfc;
+    }
+
+    /* ローディングスピナー */
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #b7e4c7;
+        border-top: 3px solid #15803d;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* ファイル選択のデザイン */
+    input[type="file"] {
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        width: 100%;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('input[type="file"]');
+        const form = document.getElementById('upload-and-grade-form');
+        const errorBubble = document.getElementById('file-error-bubble');
+
+        // ファイルが選択されたらエラーを消去
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (errorBubble) {
+                    errorBubble.style.opacity = '0';
+                    errorBubble.style.transition = 'opacity 0.2s ease';
+                    setTimeout(() => errorBubble.remove(), 200);
+                }
+            });
+        }
+
+        // フォーム送信時の挙動
+        form.onsubmit = function() {
+            if (!fileInput.value) {
+                alert("ファイルを選択してください。");
+                return false;
+            }
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('ai-loading').style.display = 'block';
+        };
+    });
 </script>
 
 {% endblock %}

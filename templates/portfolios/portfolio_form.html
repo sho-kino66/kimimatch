@@ -3,38 +3,174 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
+<div class="page-container" style="max-width: 700px; margin: 40px auto; padding: 0 20px;">
+    <div class="profile-card" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee;">
+        
+        <h2 style="text-align: center; margin-bottom: 20px; font-weight: bold; color: #333;">{{ page_title }}</h2>
+        
+        <p style="color: #666; font-size: 0.9rem; text-align: center; margin-bottom: 30px;">
+            ポートフォリオの内容を入力してください。
+        </p>
 
-<div class="page-container">
-  <div class="profile-card">
+        <form method="post" id="portfolio-form">
+            {% csrf_token %}
+            
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
 
-    <h2>{{ page_title }}</h2>
-    
-    <p>
-      ポートフォリオ（作品集）のタイトルと概要説明を編集します。
-    </p>
+            {% for field in form %}
+                <div class="field-wrapper" style="margin-bottom: 35px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="font-weight: bold; font-size: 0.95rem; color: #444;">
+                            {{ field.label }}
+                        </label>
+                        {# --- 文字数カウンターの表示場所 --- #}
+                        <span class="char-counter" style="font-size: 0.8rem; color: #888;">
+                            {# アンダースコアでアクセスするように変更 #}
+                            0 / {{ field.field.widget.attrs.data_limit|default:"-" }}
+                        </span>
+                    </div>
+                    
+                    <div style="position: relative;">
+                        {{ field }}
+                        
+                        {# --- JSで制御する動的な吹き出しエラー --- #}
+                        <div class="js-error-container"></div>
+                        
+                        {# Django側からのバリデーションエラー用（初期表示用） #}
+                        {% if field.errors %}
+                            <div class="error-bubble server-error">
+                                <div class="arrow"></div>
+                                ⚠️ 文字数が越えました
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <button type="submit" id="submit-btn" style="width: 100%; padding: 15px; background-color: #e31919; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: background 0.3s;">
+                保存する
+            </button>
+        </form>
+        </form>
 
-    <form method="post">
-      {% csrf_token %}
-      
-      {% if request.GET.next %}
-        <input type="hidden" name="next" value="{{ request.GET.next }}">
-      {% endif %}
-      {{ form.as_p }}
-      
-      <button type="submit">保存する</button>
-    </form>
-
-    <hr>
-    
-    {% if request.GET.next %}
-      <a href="{{ request.GET.next }}" class="back-link">← 戻る</a>
-      
-    {% elif portfolio %}
-      <a href="{% url 'portfolios:detail' portfolio.pk %}" class="back-link">← 作品管理に戻る</a>
-      
-    {% else %}
-      <a href="{% url 'accounts:my_page' %}" class="back-link">← マイページに戻る</a>
-    {% endif %}
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        
+        <div style="text-align: center;">
+            {# 1. 「次へ」のURLが指定されている場合 #}
+            {% if request.GET.next %}
+                <a href="{{ request.GET.next }}" class="back-link" style="color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                    ← 戻る
+                </a>
+                
+            {# 2. 既存の作品を編集している場合（作品詳細へ戻る） #}
+            {% elif portfolio and portfolio.pk %}
+                <a href="{% url 'portfolios:detail' portfolio.pk %}" class="back-link" style="color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                    ← 作品管理に戻る
+                </a>
+                
+            {# 3. 新規作成などのデフォルト（マイページへ戻る） #}
+            {% else %}
+                <a href="{% url 'accounts:my_page' %}" class="back-link" style="color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                    ← マイページに戻る
+                </a>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<style>
+    /* 入力欄のスタイル */
+    .count-target {
+        width: 100% !important;
+        padding: 12px !important;
+        border: 2px solid #eee !important;
+        border-radius: 8px !important;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        font-size: 1rem;
+    }
+
+    /* 文字数オーバー時の枠線 */
+    .input-error-border {
+        border-color: #e31919 !important;
+    }
+
+    /* 吹き出し（バルーン）のデザイン */
+    .error-bubble {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+        background-color: #e31919;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 100;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(227, 25, 25, 0.3);
+        pointer-events: none;
+    }
+
+    .error-bubble .arrow {
+        position: absolute;
+        top: -6px;
+        left: 15px;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 6px solid #e31919;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.count-target');
+
+    const updateValidation = () => {
+        inputs.forEach(input => {
+            const wrapper = input.closest('.field-wrapper');
+            const counter = wrapper.querySelector('.char-counter');
+            const errorContainer = wrapper.querySelector('.js-error-container');
+            
+            // ★ getAttribute('data_limit') に変更
+            const limitAttr = input.getAttribute('data_limit');
+            const limit = parseInt(limitAttr);
+            const currentLength = input.value.length;
+
+            // 数値が正しく取得できている場合のみ表示を更新
+            if (!isNaN(limit)) {
+                counter.textContent = `${currentLength} / ${limit}`;
+
+                if (currentLength > limit) {
+                    input.classList.add('input-error-border');
+                    if (!errorContainer.querySelector('.error-bubble')) {
+                        errorContainer.innerHTML = `
+                            <div class="error-bubble">
+                                <div class="arrow"></div>
+                                ⚠️ 文字数が越えました
+                            </div>`;
+                    }
+                    counter.style.color = '#e31919';
+                } else {
+                    input.classList.remove('input-error-border');
+                    errorContainer.innerHTML = '';
+                    counter.style.color = '#888';
+                }
+            }
+        });
+    };
+
+    inputs.forEach(input => {
+        ['input', 'change', 'keyup'].forEach(evt => {
+            input.addEventListener(evt, updateValidation);
+        });
+    });
+
+    updateValidation(); 
+});
+</script>
 {% endblock %}

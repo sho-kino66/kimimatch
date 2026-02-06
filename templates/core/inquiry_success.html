@@ -9,10 +9,12 @@
         <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
             お問い合わせを承りました。<br>内容を確認後、担当者よりご連絡いたします。
         </p>
-        <a href="{% url 'accounts:dashboard' %}" 
-           style="display: inline-block; padding: 12px 30px; background: #198754; color: white; text-decoration: none; border-radius: 30px; font-weight: bold;">
-            ダッシュボードへ戻る
-        </a>
+        <div style="text-align: center; margin-top: 30px;">
+            {# --- リンク先を 'core:top_page' に修正 --- #}
+            <a href="{% url 'core:top_page' %}" class="btn-primary" style="display: inline-block; padding: 12px 24px; background-color: #e31919; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                トップページへ戻る
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

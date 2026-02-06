@@ -25,9 +25,11 @@
         </form>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="{% url 'accounts:dashboard' %}" style="color: #666; text-decoration: none; font-size: 0.9rem;">← メインメニューに戻る</a>
-    </div>
+    <div style="text-align: center; margin-top: 20px;">
+    {# --- 'top_page' を 'core:top_page' に修正 --- #}
+    <a href="{% url 'core:top_page' %}" class="back-link" style="color: #666; text-decoration: none; font-size: 0.9rem;">
+        ← トップページに戻る
+    </a>
 </div>
 
 <style>

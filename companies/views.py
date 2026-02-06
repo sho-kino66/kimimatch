@@ -128,9 +128,16 @@ def add_favorite(request, company_pk):
 def remove_favorite(request, company_pk):
     if not hasattr(request.user, 'student'):
         return redirect('companies:company_detail', pk=company_pk)
+        
     FavoriteCompany.objects.filter(student=request.user.student, company=company_pk).delete()
+    
+    # nextパラメータがあればそこへ、なければ名前付きURLで企業詳細へ戻す
     next_url = request.POST.get('next') or request.GET.get('next')
-    return redirect(next_url if next_url else f'/companies/detail/{company_pk}/')
+    if next_url:
+        return redirect(next_url)
+    
+    # ★ 修正ポイント: 文字列ではなく名前付きURLを使用する
+    return redirect('companies:company_detail', pk=company_pk)
 
 # 4. スカウト済み学生一覧
 class ScoutedStudentListView(LoginRequiredMixin, CompanyOnlyMixin, ListView):
