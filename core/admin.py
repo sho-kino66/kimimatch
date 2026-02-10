@@ -1,26 +1,31 @@
 from django.contrib import admin
-from .models import Announcement,Tag,Inquiry
-
+from .models import Announcement, Tag, Inquiry, SchoolApplication, CompanyApplication
 
 admin.site.register(Announcement)
-admin.site.register(Tag) # Tagを登録
+admin.site.register(Tag)
 
 @admin.register(Inquiry)
 class InquiryAdmin(admin.ModelAdmin):
-    # 1. 管理画面の一覧に表示する項目
     list_display = ('created_at', 'name', 'subject', 'email')
-    
-    # 2. 一覧画面で内容をクリックして詳細ページへ飛べるようにする項目
     list_display_links = ('created_at', 'subject')
-    
-    # 3. 検索ボックスの追加（名前や件名で検索可能に）
     search_fields = ('name', 'subject', 'email', 'message')
-    
-    # 4. 右側に日付フィルターを追加
     list_filter = ('created_at',)
-    
-    # 5. 並び順を「新しい順（送信日時が遅い順）」にする
     ordering = ('-created_at',)
 
-    # 6. 内容を編集不可（読み取り専用）にする場合は以下を追加（任意）
-    # readonly_fields = ('name', 'email', 'subject', 'message', 'created_at')
+# --- 学校申し込みの管理画面設定 ---
+@admin.register(SchoolApplication)
+class SchoolApplicationAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'school_name', 'contact_name', 'email', 'phone')
+    list_display_links = ('created_at', 'school_name')
+    search_fields = ('school_name', 'contact_name', 'email', 'address')
+    list_filter = ('created_at',)
+    ordering = ('-created_at',)
+
+# --- 企業申し込みの管理画面設定 ---
+@admin.register(CompanyApplication)
+class CompanyApplicationAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'company_name', 'contact_name', 'email', 'phone')
+    list_display_links = ('created_at', 'company_name')
+    search_fields = ('company_name', 'contact_name', 'email', 'address')
+    list_filter = ('created_at',)
+    ordering = ('-created_at',)

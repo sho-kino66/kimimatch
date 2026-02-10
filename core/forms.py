@@ -1,59 +1,53 @@
 from django import forms
-from .models import Inquiry
-from django.core.validators import RegexValidator  # ★追加
+from .models import Inquiry, SchoolApplication, CompanyApplication
+from django.core.validators import RegexValidator
 
-# --- 電話番号用のバリデーター（数字とハイフンのみ許可） ---
+# --- 電話番号用のバリデーター ---
 tel_validator = RegexValidator(
     regex=r'^[0-9-]+$',
     message='電話番号は数字とハイフン（-）のみで入力してください。'
 )
 
-class SchoolApplicationForm(forms.Form):
-    school_name = forms.CharField(
-        label="学校名", max_length=100, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：〇〇専門学校'})
-    )
-    contact_name = forms.CharField(
-        label="担当者名", max_length=100, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full'})
-    )
-    email = forms.EmailField(
-        label="メールアドレス", required=True,
-        widget=forms.EmailInput(attrs={'class': 'input-full'})
-    )
-    phone = forms.CharField(
-        label="電話番号", max_length=20, required=True,
-        validators=[tel_validator],  # ★バリデーターを適用
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '090-1234-5678', 'type': 'tel'}) # type="tel"を追加
-    )
-    address = forms.CharField(
-        label="住所", max_length=255, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：東京都新宿区西新宿1-1-1'})
-    )
+# --- 学校申し込みフォーム ---
+class SchoolApplicationForm(forms.ModelForm):
+    class Meta:
+        model = SchoolApplication
+        fields = ['school_name', 'contact_name', 'email', 'phone', 'address']
+        widgets = {
+            'school_name': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：〇〇専門学校'}),
+            'contact_name': forms.TextInput(attrs={'class': 'input-full'}),
+            'email': forms.EmailInput(attrs={'class': 'input-full'}),
+            'phone': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '090-1234-5678', 'type': 'tel'}),
+            'address': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：東京都新宿区西新宿1-1-1'}),
+        }
 
-class CompanyApplicationForm(forms.Form):
-    company_name = forms.CharField(
-        label="企業名", max_length=100, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：〇〇株式会社'})
-    )
-    contact_name = forms.CharField(
-        label="担当者名", max_length=100, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full'})
-    )
-    email = forms.EmailField(
-        label="メールアドレス", required=True,
-        widget=forms.EmailInput(attrs={'class': 'input-full'})
-    )
-    phone = forms.CharField(
-        label="電話番号", max_length=20, required=True,
-        validators=[tel_validator],  # ★バリデーターを適用
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '03-1234-5678', 'type': 'tel'}) # type="tel"を追加
-    )
-    address = forms.CharField(
-        label="住所", max_length=255, required=True,
-        widget=forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：東京都新宿区西新宿1-1-1'})
-    )
+    # ラベルを日本語にするために個別に定義（ModelForm内）
+    school_name = forms.CharField(label="学校名")
+    contact_name = forms.CharField(label="担当者名")
+    email = forms.EmailField(label="メールアドレス")
+    phone = forms.CharField(label="電話番号", validators=[tel_validator])
+    address = forms.CharField(label="住所")
 
+# --- 企業申し込みフォーム ---
+class CompanyApplicationForm(forms.ModelForm):
+    class Meta:
+        model = CompanyApplication
+        fields = ['company_name', 'contact_name', 'email', 'phone', 'address']
+        widgets = {
+            'company_name': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：〇〇株式会社'}),
+            'contact_name': forms.TextInput(attrs={'class': 'input-full'}),
+            'email': forms.EmailInput(attrs={'class': 'input-full'}),
+            'phone': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '03-1234-5678', 'type': 'tel'}),
+            'address': forms.TextInput(attrs={'class': 'input-full', 'placeholder': '例：東京都新宿区西新宿1-1-1'}),
+        }
+
+    company_name = forms.CharField(label="企業名")
+    contact_name = forms.CharField(label="担当者名")
+    email = forms.EmailField(label="メールアドレス")
+    phone = forms.CharField(label="電話番号", validators=[tel_validator])
+    address = forms.CharField(label="住所")
+
+# --- お問い合わせフォーム ---
 class InquiryForm(forms.ModelForm):
     class Meta:
         model = Inquiry

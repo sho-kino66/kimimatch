@@ -51,3 +51,33 @@ class Inquiry(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+
+class SchoolApplication(models.Model):
+    school_name = models.CharField(max_length=100, verbose_name="学校名")
+    contact_name = models.CharField(max_length=100, verbose_name="担当者名")
+    email = models.EmailField(verbose_name="メールアドレス")
+    phone = models.CharField(max_length=20, verbose_name="電話番号")
+    address = models.CharField(max_length=255, verbose_name="住所")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="申込日")
+
+    class Meta:
+        verbose_name = "学校申し込み"
+        verbose_name_plural = "学校申し込み一覧"
+
+    def __str__(self):
+        return self.school_name
+
+class CompanyApplication(models.Model):
+    company_name = models.CharField(max_length=100, verbose_name="企業名")
+    contact_name = models.CharField(max_length=100, verbose_name="担当者名")
+    email = models.EmailField(verbose_name="メールアドレス")
+    phone = models.CharField(max_length=20, verbose_name="電話番号")
+    address = models.CharField(max_length=255, verbose_name="住所")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="申込日")
+
+    class Meta:
+        verbose_name = "企業申し込み"
+        verbose_name_plural = "企業申し込み一覧"
+
+    def __str__(self):
+        return self.company_name

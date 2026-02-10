@@ -42,6 +42,10 @@ class SchoolApplicationView(FormView):
     success_url = reverse_lazy('core:application_success') 
 
     def form_valid(self, form):
+        # 1. データベースに保存
+        form.save()
+        
+        # 2. メール送信処理（既存の処理）
         data = form.cleaned_data
         subject = f"【キミマッチ】学校利用の申し込み: {data['school_name']}"
         message = f"学校名: {data['school_name']}\n担当者: {data['contact_name']}\nEmail: {data['email']}\nTel: {data['phone']}\n住所: {data['address']}"
@@ -59,6 +63,10 @@ class CompanyApplicationView(FormView):
     success_url = reverse_lazy('core:application_success') 
 
     def form_valid(self, form):
+        # 1. データベースに保存
+        form.save()
+
+        # 2. メール送信処理（既存の処理）
         data = form.cleaned_data
         subject = f"【キミマッチ】企業利用の申し込み: {data['company_name']}"
         message = f"企業名: {data['company_name']}\n担当者: {data['contact_name']}\nEmail: {data['email']}\nTel: {data['phone']}\n住所: {data['address']}"
@@ -68,7 +76,6 @@ class CompanyApplicationView(FormView):
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, superuser_emails, fail_silently=False)
 
         return super().form_valid(form)
-
 def inquiry_view(request):
     if request.method == 'POST':
         form = InquiryForm(request.POST)
